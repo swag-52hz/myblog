@@ -1,0 +1,58 @@
+INFO 2019-10-10 09:53:19,091 autoreload 597 Watching for file changes with StatReloader
+INFO 2019-10-10 09:53:28,843 basehttp 154 "GET / HTTP/1.1" 200 5263
+INFO 2019-10-10 09:53:29,115 basehttp 154 "GET /static/rest_framework/css/default.css HTTP/1.1" 304 0
+INFO 2019-10-10 09:53:29,118 basehttp 154 "GET /static/rest_framework/js/jquery-3.4.1.min.js HTTP/1.1" 304 0
+INFO 2019-10-10 09:53:29,119 basehttp 154 "GET /static/rest_framework/css/prettify.css HTTP/1.1" 304 0
+INFO 2019-10-10 09:53:29,127 basehttp 154 "GET /static/rest_framework/js/prettify-min.js HTTP/1.1" 304 0
+INFO 2019-10-10 09:53:29,129 basehttp 154 "GET /static/rest_framework/css/bootstrap-tweaks.css HTTP/1.1" 304 0
+INFO 2019-10-10 09:53:29,136 basehttp 154 "GET /static/rest_framework/js/default.js HTTP/1.1" 304 0
+INFO 2019-10-10 09:53:29,133 basehttp 154 "GET /static/rest_framework/css/bootstrap.min.css HTTP/1.1" 304 0
+INFO 2019-10-10 09:53:29,129 basehttp 154 "GET /static/rest_framework/js/ajax-form.js HTTP/1.1" 304 0
+INFO 2019-10-10 09:53:29,138 basehttp 154 "GET /static/rest_framework/js/bootstrap.min.js HTTP/1.1" 304 0
+INFO 2019-10-10 09:53:29,143 basehttp 154 "GET /static/rest_framework/js/csrf.js HTTP/1.1" 304 0
+INFO 2019-10-10 09:53:29,202 basehttp 154 "GET /static/rest_framework/img/grid.png HTTP/1.1" 304 0
+WARNING 2019-10-10 09:53:29,411 log 228 Not Found: /favicon.ico
+WARNING 2019-10-10 09:53:29,414 basehttp 154 "GET /favicon.ico HTTP/1.1" 404 4406
+INFO 2019-10-10 09:53:34,650 basehttp 154 "GET /index/ HTTP/1.1" 200 17060
+WARNING 2019-10-10 09:53:35,677 basehttp 154 "GET /static/images/wechat.jpg HTTP/1.1" 404 1675
+INFO 2019-10-10 09:53:38,417 basehttp 154 "GET /register/ HTTP/1.1" 200 4591
+INFO 2019-10-10 09:53:38,436 basehttp 154 "GET /static/users/js/auth.js HTTP/1.1" 200 10841
+WARNING 2019-10-10 09:53:38,520 log 228 Not Found: /image_codes/484fae29-5af4-42e8-9369-3fbcfb38d3fe/
+WARNING 2019-10-10 09:53:38,526 basehttp 154 "GET /image_codes/484fae29-5af4-42e8-9369-3fbcfb38d3fe/ HTTP/1.1" 404 4520
+WARNING 2019-10-10 09:53:42,284 log 228 Not Found: /usernames/xiaoming/
+WARNING 2019-10-10 09:53:42,285 basehttp 154 "GET /usernames/xiaoming/ HTTP/1.1" 404 4430
+WARNING 2019-10-10 09:53:42,383 log 228 Not Found: /image_codes/e7547d6e-8a8c-4016-b4ca-048d8f0dcb2a/
+WARNING 2019-10-10 09:53:42,384 basehttp 154 "GET /image_codes/e7547d6e-8a8c-4016-b4ca-048d8f0dcb2a/ HTTP/1.1" 404 4520
+INFO 2019-10-10 09:56:37,355 basehttp 154 "GET /register/ HTTP/1.1" 200 4591
+WARNING 2019-10-10 09:56:37,420 log 228 Not Found: /image_codes/16ea7975-51d9-490e-8b32-3214070c9708/
+WARNING 2019-10-10 09:56:37,422 basehttp 154 "GET /image_codes/16ea7975-51d9-490e-8b32-3214070c9708/ HTTP/1.1" 404 4520
+INFO 2019-10-10 09:56:38,166 basehttp 154 "GET /register/ HTTP/1.1" 200 4591
+WARNING 2019-10-10 09:56:38,213 log 228 Not Found: /image_codes/a88a99a9-b616-4230-aea9-1e997c2dd847/
+WARNING 2019-10-10 09:56:38,219 basehttp 154 "GET /image_codes/a88a99a9-b616-4230-aea9-1e997c2dd847/ HTTP/1.1" 404 4520
+INFO 2019-10-10 09:56:38,685 basehttp 154 "GET /register/ HTTP/1.1" 200 4591
+WARNING 2019-10-10 09:56:38,746 log 228 Not Found: /image_codes/85c6e094-3f86-4838-8bb4-6563b633a2db/
+WARNING 2019-10-10 09:56:38,748 basehttp 154 "GET /image_codes/85c6e094-3f86-4838-8bb4-6563b633a2db/ HTTP/1.1" 404 4520
+INFO 2019-10-10 09:56:38,965 basehttp 154 "GET /register/ HTTP/1.1" 200 4591
+WARNING 2019-10-10 09:56:39,012 log 228 Not Found: /image_codes/14100544-183b-43d6-a261-2f5fceffd7a1/
+WARNING 2019-10-10 09:56:39,015 basehttp 154 "GET /image_codes/14100544-183b-43d6-a261-2f5fceffd7a1/ HTTP/1.1" 404 4520
+INFO 2019-10-10 09:58:37,312 autoreload 597 Watching for file changes with StatReloader
+INFO 2019-10-10 09:58:47,712 autoreload 597 Watching for file changes with StatReloader
+INFO 2019-10-10 09:58:50,520 basehttp 154 "GET /register/ HTTP/1.1" 200 4591
+WARNING 2019-10-10 09:58:50,604 log 228 Not Found: /image_codes/af1b1f4f-6aa7-4f78-a012-e1664f3815c9/
+WARNING 2019-10-10 09:58:50,607 basehttp 154 "GET /image_codes/af1b1f4f-6aa7-4f78-a012-e1664f3815c9/ HTTP/1.1" 404 4520
+WARNING 2019-10-10 09:58:53,072 log 228 Not Found: /usernames/xiaoming/
+WARNING 2019-10-10 09:58:53,075 basehttp 154 "GET /usernames/xiaoming/ HTTP/1.1" 404 4430
+WARNING 2019-10-10 09:58:53,180 log 228 Not Found: /image_codes/9bbfc206-1666-4ff8-a154-31f6506d9a7c/
+WARNING 2019-10-10 09:58:53,183 basehttp 154 "GET /image_codes/9bbfc206-1666-4ff8-a154-31f6506d9a7c/ HTTP/1.1" 404 4520
+INFO 2019-10-10 10:03:22,138 autoreload 597 Watching for file changes with StatReloader
+INFO 2019-10-10 10:03:26,646 basehttp 154 "GET /register/ HTTP/1.1" 200 4591
+INFO 2019-10-10 10:03:27,017 views 25 image_code: LFOE
+INFO 2019-10-10 10:03:27,019 basehttp 154 "GET /image_codes/a29cff54-9b50-40d2-9824-fc767657d1f8/ HTTP/1.1" 200 2945
+WARNING 2019-10-10 10:03:28,302 log 228 Not Found: /usernames/xiaoming/
+WARNING 2019-10-10 10:03:28,303 basehttp 154 "GET /usernames/xiaoming/ HTTP/1.1" 404 4635
+INFO 2019-10-10 10:03:28,399 views 25 image_code: W8KU
+INFO 2019-10-10 10:03:28,401 basehttp 154 "GET /image_codes/2de4ecfa-564e-4bc8-8471-746d3b002d41/ HTTP/1.1" 200 3339
+INFO 2019-10-10 10:03:30,259 views 25 image_code: UAW5
+INFO 2019-10-10 10:03:30,260 basehttp 154 "GET /image_codes/b8fc4e67-d620-488d-b909-f70e296ef68a/ HTTP/1.1" 200 3127
+INFO 2019-10-10 10:04:58,989 views 25 image_code: VT6B
+INFO 2019-10-10 10:04:58,991 basehttp 154 "GET /image_codes/7f313fc8-2194-441c-a34d-790dc8662a59/ HTTP/1.1" 200 3162
