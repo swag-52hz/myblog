@@ -1,9 +1,11 @@
 import logging
+import json
 from django.shortcuts import render
 from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage
 from django.views import View
 from utils.json_fun import to_json_data
+from utils.res_code import Code, error_map
 from .contants import NEWS_PER_PAGE
 from . import models
 
@@ -85,10 +87,50 @@ class NewsDetailView(View):
             only('title', 'author__username', 'tag__name', 'content', 'update_time').\
             filter(is_delete=False, id=news_id).first()
         if news:
+            comments = models.Comments.objects.select_related('author', 'parent').\
+                only('content', 'author__username', 'update_time', 'parent__content',
+                     'parent__author__username', 'parent__update_time').filter(is_delete=False, news_id=news_id)
+            comments_list = []
+            comment_count = comments.count()
+            for comm in comments:
+                comments_list.append(comm.to_dict_data())
             return render(request, 'news/news_detail.html', locals())
         else:
             return Http404('id为{}的文章不存在！！！'.format(news_id))
 
+
+class AddCommentsView(View):
+    def post(self, request, news_id):
+        if not request.user.is_authenticated:
+            return to_json_data(errno=Code.SESSIONERR, errmsg=error_map(Code.SESSIONERR))
+        if not models.News.objects.only('id').filter(is_delete=False, id=news_id).exists():
+            return to_json_data(errno=Code.PARAMERR, errmsg='文章不存在！！！')
+        json_data = request.body.decode('utf8')
+        if not json_data:
+            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+        dict_data = json.loads(json_data)
+        parent_id = dict_data.get('parent_id')
+        content = dict_data.get('content')
+        try:
+            if parent_id:
+                parent_id = int(parent_id)
+                query_set = models.Comments.objects.filter(id=parent_id, news_id=news_id)
+                if not query_set.exists():
+                    return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+                if query_set.first().author.username == request.user.username:
+                    return to_json_data(errno=Code.PARAMERR, errmsg='不可评论自己的发言！！！')
+        except Exception as e:
+            logger.info('处理数据出错：{}'.format(e))
+            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+
+        new_comment = models.Comments()
+        new_comment.news_id = news_id
+        new_comment.author = request.user
+        new_comment.content = content
+        new_comment.parent_id = parent_id if parent_id else None
+        new_comment.save()
+
+        return to_json_data(data=new_comment.to_dict_data())
 
 class SearchView(View):
     def get(self, request):

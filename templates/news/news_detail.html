@@ -21,37 +21,58 @@
       <div class="comment-contain">
         <div class="comment-pub clearfix">
           <div class="new-comment">
-            文章评论(<span class="comment-count">0</span>)
+            文章评论(<span class="comment-count">{{ comment_count }}</span>)
           </div>
-          <div class="comment-control please-login-comment" style="display:none;">
-            <input type="text" placeholder="请登录后参加评论">
-          </div>
-          <div class="comment-control logged-comment">
-            <input type="text" placeholder="请填写评论">
-          </div>
-          <button class="comment-btn">发表评论</button>
+            {% if user.is_authenticated %}
+                <div class="comment-control logged-comment" news-id="{{ news.id }}">
+                    <input type="text" placeholder="请填写评论">
+                    <button class="comment-btn">发表评论</button>
+                </div>
+            {% else %}
+                <div class="comment-control please-login-comment" news-id="{{ news.id }}">
+                    <input type="text" placeholder="请登录后参加评论" readonly>
+                    <button class="comment-btn">发表评论</button>
+                </div>
+            {% endif %}
         </div>
         <ul class="comment-list">
-          <li class="comment-item">
-            <div class="comment-info clearfix">
-              <img src="../images/avatar.jpeg" alt="avatar" class="comment-avatar">
-              <span class="comment-user">评论人</span>
-              <span class="comment-pub-time">1小时前</span>
-            </div>
-            <div class="comment-content">这是一条评论</div>
-          </li>
-          <li class="comment-item">
-            <div class="comment-info clearfix">
-              <img src="../images/avatar.jpeg" alt="avatar" class="comment-avatar">
-              <span class="comment-user">评论人</span>
-              <span class="comment-pub-time">1小时前</span>
-            </div>
-            <div class="comment-content">这是一条评论</div>
-          </li>
+            {% for one_comment in comments_list %}
+                <li class="comment-item">
+                    <div class="comment-info clearfix">
+                        <img src="{% static 'images/avatar.jpeg' %}" alt="avatar" class="comment-avatar">
+                        <span class="comment-user">{{ one_comment.author }}</span>
+                    </div>
+                    <div class="comment-content">{{ one_comment.content }}</div>
+
+                    {% if one_comment.parent %}
+                        <div class="parent_comment_text">
+                            <div class="parent_username">{{ one_comment.parent.author }}</div>
+                            <br/>
+                            <div class="parent_content_text">
+                                {{ one_comment.parent.content }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="comment_time left_float">{{ one_comment.update_time }}</div>
+                    <a href="javascript:;" class="reply_a_tag right_float">回复</a>
+                    <form class="reply_form left_float" comment-id="{{ one_comment.content_id }}"
+                          news-id="{{ one_comment.news_id }}">
+                        <textarea class="reply_input"></textarea>
+                        <input type="button" value="回复" class="reply_btn right_float">
+                        <input type="reset" name="" value="取消" class="reply_cancel right_float">
+                    </form>
+
+                </li>
+            {% endfor %}
         </ul>
       </div>
 
     </div>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'news/js/message.js' %}"></script>
+    <script src="{% static 'news/js/news_detail.js' %}"></script>
 {% endblock %}
 
 

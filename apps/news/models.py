@@ -41,6 +41,17 @@ class Comments(ModelBase):
     # 添加父级评论，关联表自身
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
 
+    def to_dict_data(self):
+        comment_dict = {
+            'content_id': self.id,
+            'news_id': self.news_id,
+            'content': self.content,
+            'update_time': self.update_time.strftime("%Y-%m-%d %H:%M"),
+            'author': self.author.username,
+            'parent': self.parent.to_dict_data() if self.parent else None
+        }
+        return comment_dict
+
     class Meta:
         ordering = ['-update_time', '-id']
         db_table = 'tb_comments'
