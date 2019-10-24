@@ -2,10 +2,13 @@ import logging
 import json
 from django.shortcuts import render
 from django.http import Http404
-from django.core.paginator import Paginator, EmptyPage
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views import View
+
+from myblog import settings
 from utils.json_fun import to_json_data
 from utils.res_code import Code, error_map
+from haystack.views import SearchView as _SearchView
 from .contants import NEWS_PER_PAGE
 from . import models
 
@@ -84,9 +87,11 @@ class BannerListView(View):
 class NewsDetailView(View):
     def get(self, request, news_id):
         news = models.News.objects.select_related('author', 'tag').\
-            only('title', 'author__username', 'tag__name', 'content', 'update_time').\
+            only('title', 'author__username', 'tag__name', 'content', 'update_time', 'clicks').\
             filter(is_delete=False, id=news_id).first()
         if news:
+            news.clicks = int(news.clicks) + 1
+            news.save()
             comments = models.Comments.objects.select_related('author', 'parent').\
                 only('content', 'author__username', 'update_time', 'parent__content',
                      'parent__author__username', 'parent__update_time').filter(is_delete=False, news_id=news_id)
@@ -102,7 +107,7 @@ class NewsDetailView(View):
 class AddCommentsView(View):
     def post(self, request, news_id):
         if not request.user.is_authenticated:
-            return to_json_data(errno=Code.SESSIONERR, errmsg=error_map(Code.SESSIONERR))
+            return to_json_data(errno=Code.SESSIONERR, errmsg=error_map[Code.SESSIONERR])
         if not models.News.objects.only('id').filter(is_delete=False, id=news_id).exists():
             return to_json_data(errno=Code.PARAMERR, errmsg='文章不存在！！！')
         json_data = request.body.decode('utf8')
@@ -132,6 +137,31 @@ class AddCommentsView(View):
 
         return to_json_data(data=new_comment.to_dict_data())
 
-class SearchView(View):
-    def get(self, request):
-        return render(request, 'news/search.html')
+
+class SearchView(_SearchView):
+    # 模版文件
+    template = 'news/search.html'
+
+    # 重写响应方式，如果请求参数q为空，返回模型News的热门新闻数据，否则根据参数q搜索相关数据
+    def create_response(self):
+        kw = self.request.GET.get('q', '')
+        if not kw:
+            show_all = True
+            hot_news = models.HotNews.objects.select_related('news'). \
+                only('news__title', 'news__image_url', 'news__id'). \
+                filter(is_delete=False).order_by('priority', '-news__clicks')
+
+            paginator = Paginator(hot_news, settings.HAYSTACK_SEARCH_RESULTS_PER_PAGE)
+            try:
+                page = paginator.page(int(self.request.GET.get('page', 1)))
+            except PageNotAnInteger:
+                # 如果参数page的数据类型不是整型，则返回第一页数据
+                page = paginator.page(1)
+            except EmptyPage:
+                # 用户访问的页数大于实际页数，则返回最后一页的数据
+                page = paginator.page(paginator.num_pages)
+            return render(self.request, self.template, locals())
+        else:
+            show_all = False
+            qs = super(SearchView, self).create_response()
+            return qs

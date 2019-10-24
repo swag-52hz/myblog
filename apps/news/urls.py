@@ -9,5 +9,5 @@ urlpatterns = [
     path('news/banners/', views.BannerListView.as_view(), name='news_banner'),
     path('news/<int:news_id>/', views.NewsDetailView.as_view(), name='news_detail'),
     path('news/<int:news_id>/comments/', views.AddCommentsView.as_view(), name='news_comments'),
-    path('search/', views.SearchView.as_view(), name='search'),
+    path('search/', views.SearchView(), name='search'),
 ]
