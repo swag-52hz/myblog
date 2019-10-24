@@ -11,6 +11,7 @@
 .side .side-activities .activities-title {
     font-size: 18px;
     line-height: 60px;
+    font-weight: bolder;
     padding: 0 20px;
 }
 .side .side-activities .activities-title a {
@@ -20,7 +21,7 @@
 }
 .side .side-activities .activities-img {
     width: 320px;
-    height: 215px;
+    height: 500px;
     position: relative;
     margin: 0 20px 20px;
 }

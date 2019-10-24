@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <title>{% block title %}IndexPage{% endblock %}</title>
     <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
-    <link rel="stylesheet" href="{% static 'base/css/reset.css' %}">
-    <link rel="stylesheet" href="{% static 'base/css/common.css' %}">
-    <link rel="stylesheet" href="{% static 'base/css/side.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base/reset.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base/side.css' %}">
     {% block link %}{% endblock %}
     <link rel="stylesheet" href="http://at.alicdn.com/t/font_684044_un7umbuwwfp.css">
 </head>
@@ -70,29 +70,12 @@
                 <!-- side start -->
                 <aside class="side">
                     <div class="side-activities">
-                        <h3 class="activities-title">在线课堂<a href="javascript:void(0)">更多</a></h3>
+                        <h3 class="activities-title">今日天气<a href="javascript:void(0)">更多</a></h3>
                         <div class="activities-img">
-                            <a href="javascript:void(0);" target="_blank">
-                                <img src="{% static 'news/images/english.jpg' %}" alt="title">
-                            </a>
-                            <p class="activities-tips">对话国外小姐姐</p>
+                            <div>
+                                <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=tw&skin=pitaya" frameborder="0" width="300" height="500" allowtransparency="true"></iframe>
+                            </div>
                         </div>
-                        <ul class="activities-list">
-                            <li>
-                                <a href="javascript:void(0);" target="_blank">
-                                    <span class="active-status active-start">报名中</span>
-                                    <span class="active-title"><a
-                                            href="https://www.shiguangkey.com/course/2432"> Django 项目班</a></span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0);" target="_blank">
-                                    <span class="active-status active-end">已结束</span>
-                                    <span class="active-title"><a
-                                            href="https://www.shiguangkey.com/course/2321">Python入门基础班</a></span>
-                                </a>
-                            </li>
-                        </ul>
                     </div>
                     <div class="side-attention clearfix">
                         <h3 class="attention-title">关注我</h3>
@@ -121,7 +104,7 @@
                             <li>
                                 <a href="javascript:void(0)" class="hot-news-contain clearfix">
                                     <div class="hot-news-thumbnail">
-                                        <img src="{% static 'news/images/python_web.jpg' %}"
+                                        <img src="/media/python_web.jpg"
                                              alt="">
                                     </div>
                                     <div class="hot-news-content">
@@ -173,7 +156,8 @@
 </footer>
 <!-- footer end -->
 <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
-<script src="{% static 'base/js/commons.js' %}"></script>
+<script src="{% static 'js/base/message.js' %}"></script>
+<script src="{% static 'js/base/commons.js' %}"></script>
 {% block script %}{% endblock %}
 
 </body>
