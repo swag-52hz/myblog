@@ -110,6 +110,7 @@
 .side-attention .side-attention-address li {
     line-height: 66px;
 }
+
 .side-attention-address li i {
     font-size: 40px;
     vertical-align: -10px;
@@ -120,7 +121,7 @@
     width: 100px;
     height: 100px;
     margin-top: 20px;
-    background: url('../../images/wechat.jpg') no-repeat center/100%;
+    background: url('../../images/wechat.png') no-repeat center/100%;
 }
 .side-attention .side-attention-qr p {
     text-align: center;

@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'department',
     'rest_framework',
     'verifications',
-    'haystack'
+    'haystack',
+    'common'
 ]
 
 AUTH_USER_MODEL = 'users.User'

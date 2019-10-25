@@ -1,67 +1,36 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <title>课程详情页</title>
-  <link rel="stylesheet" href="http://at.alicdn.com/t/font_684044_un7umbuwwfp.css">
-  <meta name="author" content="handsomeFu"/>
-  <link rel="stylesheet" href="../css/base/reset.css">
-  <link rel="stylesheet" href="../css/base/common.css">
-  <link rel="stylesheet" href="../css/course/course-detail.css">
-</head>
-<body>
-<!-- header start -->
-<header id="header">
-  <div class="mw1200 header-contain clearfix">
-    <!-- logo start -->
-    <h1 class="logo">
-      <a href="javascript:void(0);" class="logo-title">Python</a>
-    </h1>
-    <!-- logo end -->
-    <!-- nav start -->
-    <nav class="nav">
-      <ul class="menu">
-        <li class="active"><a href="../news/index.html">首页</a></li>
-        <li><a href="../course/course.html">在线课堂</a></li>
-        <li><a href="docDownload.html">下载文档</a></li>
-        <li><a href="../news/search.html">搜索</a></li>
-      </ul>
-    </nav>
-    <!-- nav end -->
-    <!-- login start -->
-    <div class="login-box">
-      <div>
-        <i class="PyWhich py-user"></i>
-        <span>
-            <a href="javascript:void(0);" class="login">登录</a> / <a href="../users/register.html" class="reg">注册</a>
-            </span>
-      </div>
-      <div class="author hide">
-        <i class="PyWhich py-user"></i>
-        <span>qwertyui</span>
-        <ul class="author-menu">
-          <li><a href="javascript:void(0);">后台管理</a></li>
-          <li><a href="javascript:void(0);">退出登录</a></li>
-        </ul>
-      </div>
-    </div>
-    <!-- login end -->
-  </div>
-</header>
-<!-- header end -->
-<!-- main start -->
-<main id="main">
+{% extends 'base/base.html' %}
+{% load my_filter %}
+{% block title %}
+    课程详情页
+{% endblock %}
+{% block link %}
+    <link rel="stylesheet" href="{% static 'css/course/course-detail.css' %}">
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1477305_r4riec8l5a.css">
+    <!-- 引入播放器 css 文件 -->
+    <link href="//imgcache.qq.com/open/qcloud/video/tcplayer/tcplayer.css" rel="stylesheet">
+    <!-- 如需在IE8、9浏览器中初始化播放器，浏览器需支持Flash并在页面中引入 -->
+    <!--[if lt IE 9]>
+    <script src="//imgcache.qq.com/open/qcloud/video/tcplayer/ie8/videojs-ie8.js"></script>
+    <![endif]-->
+    <!-- 如果需要在 Chrome Firefox 等现代浏览器中通过H5播放hls，需要引入 hls.js -->
+    <script src="//imgcache.qq.com/open/qcloud/video/tcplayer/lib/hls.min.0.8.8.js"></script>
+    <!-- 引入播放器 js 文件 -->
+    <script src="//imgcache.qq.com/open/qcloud/video/tcplayer/tcplayer.min.js"></script>
+    <!-- 示例 CSS 样式可自行删除 -->
+{% endblock %}
+{% block main %}
+    <!-- main start -->
+        <main id="main">
   <div class="w1200">
     <div class="course-contain">
       <div class="course-top-contain">
-        <h4 class="course-title">课程标题</h4>
+        <h4 class="course-title">{{ course.name }}</h4>
         <div class="course-other clearfix">
           <div class="share-list">
             <span>分享至:</span>
             <i class="PyWhich py-weibo"></i>
-            <i class="PyWhich py-weibo2"></i>
+              <i class="PyWhich py-GitHub" style="color: black"></i>
+              <i class="PyWhich py-zhihu" style="color:rgb(0, 108, 226);"></i>
           </div>
           <div class="buy-list">
             <span class="price">免费</span>
@@ -69,33 +38,48 @@
         </div>
       </div>
       <div class="course-video" id="course-video">
+          <video id="player-container-id" preload="auto" width="800" height="400" playsinline webkit-playsinline x5-playsinline></video>
+          <div class="play-box">
+                <p class="play-title"><i class="iconfont icon-liebiaotubiao"></i>&nbsp;播放列表</p>
+                <ul class="play-list">
+                    {% for item in courses %}
+                        <li class="play-item {% if course.id == item.id %}active{% endif %}">
+                            <a href="{% url 'course:course_detail' item.id %}">
+                                <i class="iconfont icon-bofanganniu"></i>&nbsp;
+                                <p class="play-name">{{ forloop.counter }}-{{ item.name }}</p>&emsp;
+                                <span class="play-time">{{ item.duration|change }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+          </div>
       </div>
       <div class="course-bottom-contain">
         <div class="course-detail-list">
           <div class="course-item clearfix">
             <h5 class="course-title">课程讲师</h5>
             <div class="teacher-box clearfix">
-              <img src="../images/avatar.jpeg" alt="Which"
-                   title="Which" class="teacher-avatar">
+              <img src="{{ course.teacher.avatar_url }}" alt="Which"
+                   title="{{ course.teacher.name }}" class="teacher-avatar">
               <div class="teacher-info">
-                <p class="teacher-name">Tuple</p>
-                <p class="teacher-identify"> 人生苦短</p>
+                <p class="teacher-name">{{ course.teacher.name }}</p>
+                <p class="teacher-identify"> {{ course.teacher.profession }}</p>
               </div>
             </div>
             <div class="item-content">
-              人生苦短人生苦短人生苦短人生苦短人生苦短
+              个人简介：{{ course.teacher.profile }}
             </div>
           </div>
           <div class="course-item clearfix">
             <h5 class="course-title">课程简介</h5>
             <div class="item-content">
-              人生苦短人生苦短人生苦短人生苦短人生苦短
+              {{ course.introduce }}
             </div>
           </div>
           <div class="course-item clearfix">
             <h5 class="course-title">课程大纲</h5>
             <div class="item-content">
-              <p>人生苦短人生苦短人生苦短人生苦短</p>
+              <p>{{ course.outline }}</p>
             </div>
           </div>
           <div class="course-item clearfix">
@@ -107,21 +91,6 @@
               <p>4. 如有问题请咨询客服: 400-1567-315 </p>
             </div>
           </div>
-          <div class="course-item clearfix">
-            <h5 class="course-title">关于潭州课堂</h5>
-            <div class="item-content">
-              湖南潭州教育网络科技有限公司拥有千余人的优秀师资团队，是一家师资丰富、教育产品类别众多的在线培训公司。公司总部座落于美丽的星城长沙，2015年9月正式入驻芯城科技园目前拥有近两万平米办公面积。
-              在潭州学习的学员已突破1000万人次在线学员覆盖全球，包括中国、加拿大、日本、美国、韩国等诸多国家。
-            </div>
-          </div>
-          <div class="course-item clearfix">
-            <div class="item-content">
-              <div class="item-course-title">123</div>
-              <div class="item-buy-list">
-                <span class="price">免费</span>
-              </div>
-            </div>
-          </div>
         </div>
         <div class="course-side">
           <h4 class="side-title">推荐课程</h4>
@@ -130,32 +99,15 @@
     </div>
   </div>
 </main>
-<!-- main end -->
-
-
-<!-- footer start -->
-<footer id="footer">
-  <div class="footer-box">
-    <div class="footer-content">
-      <p class="top-content">
-					<span class="link">
-						<a href="javascript:void(0)">关于Python</a> |
-						<a href="javascript:void(0)">我就是我</a> |
-						<a href="javascript:void(0)">人生苦短</a> |
-						<a href="javascript:void(0)">我用Python</a>
-					</span>
-        <span class="about-me">关于我: <i class="PyWhich py-wechat"></i> Taka</span>
-      </p>
-      <p class="bottom-content">
-        <span>地址： xxxx</span>
-        <span>联系方式: <a href="tel:400-1567-315">400-1567-315</a> (24小时在线)</span>
-      </p>
-    </div>
-    <p class="copyright-desc">
-      Copyright &copy; 2008 - 2019 xxx有限公司. All Rights Reserved
-    </p>
-  </div>
-</footer>
-<!-- footer end -->
-</body>
-</html>
+    <!-- main end -->
+{% endblock %}
+{% block script %}
+    <script>
+        var player = TCPlayer("player-container-id", { // player-container-id 为播放器容器ID，必须与html中一致
+                fileID: "{{ course.file_id }}", // 请传入需要播放的视频fileID 必须
+                appID: "1300516389", // 请传入点播账号的appID 必须
+                autoplay: false //是否自动播放
+                //其他参数请在开发文档中查看
+            });
+    </script>
+{% endblock %}

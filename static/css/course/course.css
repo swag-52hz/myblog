@@ -43,6 +43,7 @@
 }
 .course-list .course-item .course-img {
     width: 100%;
+    height: 160px;
 }
 .course-list .course-item .course-content {
     padding: 0 20px;
@@ -51,34 +52,33 @@
 }
 .course-list .course-item:hover {
     box-shadow: 0 4px 8px rgba(0,0,0,.1);
+    color: orange;
 }
 .course-item .course-content .course-info {
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1.5;
     max-height: 50px;
     overflow: hidden;
+    font-weight: bolder;
 }
 .course-item .course-content .course-author{
     color: #848383;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 36px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.course-item .course-content .course-pirce {
+.course-item .course-content .course-price {
     position: absolute;
+    width: 40px;
     bottom: 10px;
     right: 21px;
-    font-size: 16px;
+    font-size: 15px;
+    text-align: center;
     line-height: 30px;
-    color: #6fa026;
-
-}
-.course-item .course-content .course-pirce span{
-    font-size: 14px;
-}
-.course-item .course-content .course-pirce.free {
-    color: green;
+    background-color: rgb(0, 190, 6);
+    color: white;
+    border-radius: 11px;
 }
 /* ========== course-container  end =========  */

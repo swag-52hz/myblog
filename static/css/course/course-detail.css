@@ -33,11 +33,15 @@
 }
 
 .price {
-    color: #f76363;
     float: right;
+    width: 50px;
+    text-align: center;
     margin-right: 20px;
     line-height: 40px;
-    font-size: 20px;
+    font-size: 18px;
+    background-color: rgb(0, 190, 6);
+    color: white;
+    border-radius: 11px;
 }
 
 .buy-btn {
@@ -54,8 +58,59 @@
 
 
 .course-video {
+    position: relative;
 	border-top: 1px solid #ddd;
+    width: 1240px;
 	height: 400px;
+}
+
+.play-box{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 440px;
+    height: 360px;
+    padding: 20px 0 20px;
+    background-color: white;
+}
+
+.play-box .play-title{
+    padding-left: 20px;
+    height: 32px;
+    line-height: 32px;
+    border-bottom: 2px solid #ddd;
+}
+
+.play-item{
+    border-bottom: 2px solid #ddd;
+    margin-top: 5px;
+    color: #55595c;
+}
+.play-box .play-list .play-item a{
+    display: inline-block;
+    height: 32px;
+    width: 400px;
+    padding: 0 20px;
+    line-height: 32px;
+}
+
+.play-box .play-list .play-item a .play-name{
+    display: inline-block;
+    vertical-align: bottom;
+    width: 280px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.play-box .play-list .play-item:hover{
+    color: blue;
+    background-color: #ccc;
+}
+
+.active{
+    color: blue;
+    background-color: #ccc;
 }
 
 .course-bottom-contain {
