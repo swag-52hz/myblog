@@ -20,13 +20,13 @@ from django.conf import settings
 
 
 urlpatterns = [
-    # path('admin/', admin.site.urls),
     path('', include('news.urls')),
     path('users/', include('users.urls')),
     path('', include('course.urls')),
     path('', include('doc.urls')),
     path('', include('department.urls')),
-    path('', include('verifications.urls'))
+    path('', include('verifications.urls')),
+    path('admin/', include('admin.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

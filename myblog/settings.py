@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'verifications',
     'haystack',
-    'common'
+    'common',
+    'admin'
 ]
 
 AUTH_USER_MODEL = 'users.User'

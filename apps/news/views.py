@@ -91,7 +91,7 @@ class NewsDetailView(View):
             filter(is_delete=False, id=news_id).first()
         if news:
             news.clicks = int(news.clicks) + 1
-            news.save()
+            news.save(update_fields=['clicks', 'update_time'])
             comments = models.Comments.objects.select_related('author', 'parent').\
                 only('content', 'author__username', 'update_time', 'parent__content',
                      'parent__author__username', 'parent__update_time').filter(is_delete=False, news_id=news_id)

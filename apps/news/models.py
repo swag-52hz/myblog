@@ -1,4 +1,5 @@
 from django.db import models
+import pytz
 from utils.model_base import ModelBase
 
 
@@ -42,11 +43,15 @@ class Comments(ModelBase):
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
 
     def to_dict_data(self):
+        # 将时区转换为中国上海
+        shanghai_tz = pytz.timezone('Asia/Shanghai')
+        # 转换为本地时间
+        local_time = shanghai_tz.normalize(self.update_time)
         comment_dict = {
             'content_id': self.id,
             'news_id': self.news_id,
             'content': self.content,
-            'update_time': self.update_time.strftime("%Y-%m-%d %H:%M"),
+            'update_time': local_time.strftime("%Y-%m-%d %H:%M"),
             'author': self.author.username,
             'parent': self.parent.to_dict_data() if self.parent else None
         }
