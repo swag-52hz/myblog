@@ -33,8 +33,10 @@
         <div class="login-box">
             {% if user.is_authenticated %}
                 <div class="author">
-                    <i class="PyWhich py-user"></i>
-                    <span>{{ user.username }}</span>
+                    <div class="user-img">
+                        <img src="{{ user.avatar_url }}" alt="">
+                    </div>
+                    <p class="user-name">{{ user.username }}</p>
                     <ul class="author-menu">
                         {% if user.is_staff %}
                         <li><a href="{% url 'admin:index' %}">后台管理</a></li>
@@ -155,7 +157,7 @@
     </div>
 </footer>
 <!-- footer end -->
-<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src="{% static 'js/base/message.js' %}"></script>
 <script src="{% static 'js/base/commons.js' %}"></script>
 {% block script %}{% endblock %}

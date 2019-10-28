@@ -43,7 +43,7 @@
                 <p class="play-title"><i class="iconfont icon-liebiaotubiao"></i>&nbsp;播放列表</p>
                 <ul class="play-list">
                     {% for item in courses %}
-                        <li class="play-item {% if course.id == item.id %}active{% endif %}">
+                        <li class="play-item {% if course.id == item.id %}playing{% endif %}">
                             <a href="{% url 'course:course_detail' item.id %}">
                                 <i class="iconfont icon-bofanganniu"></i>&nbsp;
                                 <p class="play-name">{{ forloop.counter }}-{{ item.name }}</p>&emsp;

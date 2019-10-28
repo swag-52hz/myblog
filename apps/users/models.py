@@ -12,6 +12,7 @@ class User(AbstractUser):
     objects = NewUserManager()
 
     phone = models.CharField(max_length=11, unique=True, verbose_name='手机号')
+    avatar_url = models.URLField(default='', verbose_name='用户头像url')
     email_active = models.BooleanField(default=False)
 
     REQUIRED_FIELDS = ['phone']
