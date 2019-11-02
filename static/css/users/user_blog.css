@@ -1,0 +1,93 @@
+.profile-box{
+    height: 1000px;
+}
+.filter-box{
+    width:100%;
+    height: 60px;
+    line-height: 60px;
+    background-color: rgb(242, 245, 247);
+}
+.filter-box form{
+    color: #4d4d4d;
+    font-size: 15px;
+}
+.profile-box .filter-box a{
+    display: inline-block;
+    width: 50px;
+    height: 25px;
+    text-align: center;
+    font-size: 14px;
+    color: #3399ea;
+}
+.news-list .news-item{
+    width: 100%;
+    height: 50px;
+    padding: 15px 0;
+    border-bottom: 2px dotted #ddd;
+}
+.news-list .news-item .news-title a{
+    font-size: 18px;
+    color: #3399ea;
+}
+.news-item .news-box .news-info{
+    float: left;
+    margin-top: 15px;
+}
+.news-item .news-box .news-info span{
+    color: #999;
+    font-size: 12px;
+    margin-right: 20px;
+}
+.news-item .news-box .handle-box{
+    float: right;
+    margin-top: 15px;
+}
+.news-item .news-box .handle-box a{
+    display: inline-block;
+    width: 40px;
+    text-align: center;
+    font-size: 12px;
+    color: #349EDF;
+    border-right: 1px solid #ddd;
+}
+.news-item .news-box .handle-box .delete{
+    color: rgb(202, 12, 22);
+}
+.page-box{
+    float: left;
+    height: 30px;
+    margin: 30px 300px;
+}
+.page-box li{
+    float: left;
+    /*width: 30px;*/
+    height: 30px;
+    border: 1px solid #ddd;
+    color: #349EDF;
+}
+.page-box li:hover{
+    background-color: orange;
+    color: white;
+}
+.page-box li a{
+    display: block;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+}
+
+a.disabled {
+    pointer-events: none;
+    filter: alpha(opacity=50); /*IE滤镜，透明度50%*/
+    -moz-opacity: 0.5; /*Firefox私有，透明度50%*/
+    opacity: 0.5; /*其他，透明度50%*/
+}
+.page-box .current_page{
+    background-color: orange;
+    color: white;
+}
+.page-box li .first-last{
+    width: 80px;
+    font-size: 14px;
+}

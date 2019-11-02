@@ -3,16 +3,23 @@ import logging
 from datetime import datetime
 from urllib.parse import urlencode
 
+import qiniu
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Count
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
+
+from myblog import settings
 from news import models
+from utils.qiniu_secrets import qiniu_secrets_info
 from . import constants
+from . import forms
 # Create your views here.
 from utils.json_fun import to_json_data
 from utils.res_code import Code, error_map
 from utils import paginator_script
+from utils.fastdfs.client import FDFS_Client
 
 
 logger = logging.getLogger('django')
@@ -236,6 +243,183 @@ class NewsEditView(View):
         else:
             return to_json_data(errno=Code.NODATA, errmsg='要删除的文章不存在！')
 
-    def put(self, request, news_id):
-        pass
+    def get(self, request, news_id):
+        news = models.News.objects.filter(id=news_id).first()
+        if news:
+            tags = models.Tag.objects.only('id', 'name').filter(is_delete=False)
+            return render(request, 'admin/news/news_pub.html', locals())
+        else:
+            return to_json_data(errno=Code.NODATA, errmsg='要编辑的文章不存在！')
 
+    def put(self, request, news_id):
+        news = models.News.objects.only('id').filter(id=news_id).first()
+        if not news:
+            return to_json_data(errno=Code.PARAMERR, errmsg='要更新的文章不存在！')
+        json_data = request.body
+        if not json_data:
+            return to_json_data(errno=Code.NODATA, errmsg=error_map[Code.NODATA])
+        dict_data = json.loads(json_data.decode('utf8'))
+        form = forms.NewsPubForm(data=dict_data)
+        if form.is_valid():
+            news.title = form.cleaned_data.get('title')
+            news.digest = form.cleaned_data.get('digest')
+            news.content = form.cleaned_data.get('content')
+            news.tag = form.cleaned_data.get('tag')
+            news.image_url = form.cleaned_data.get('image_url')
+            news.save()
+            return to_json_data(errmsg='文章更新成功！')
+        else:
+            err_msg_list = []
+            for item in form.errors.get_json_data().values():
+                err_msg_list.append(item[0].get('message'))
+            err_msg_str = '/'.join(err_msg_list)
+            return to_json_data(errno=Code.DATAERR, errmsg=err_msg_str)
+
+
+class NewsPubView(View):
+    def get(self, request):
+        tags = models.Tag.objects.only('id', 'name').filter(is_delete=False)
+        return render(request, 'users/news_pub.html', locals())
+
+    def post(self, request):
+        json_data = request.body
+        if not json_data:
+            return to_json_data(errno=Code.NODATA, errmsg=error_map[Code.NODATA])
+        dict_data = json.loads(json_data.decode('utf8'))
+        form = forms.NewsPubForm(data=dict_data)
+        if form.is_valid():
+            # 延缓保存
+            news_instance = form.save(commit=False)
+            news_instance.author = request.user
+            news_instance.save()
+            return to_json_data(errmsg='文章添加成功！')
+        else:
+            err_msg_list = []
+            for item in form.errors.get_json_data().values():
+                err_msg_list.append(item[0].get('message'))
+            err_msg_str = '/'.join(err_msg_list)
+            return to_json_data(errno=Code.DATAERR, errmsg=err_msg_str)
+
+
+class NewsUploadImage(View):
+    def post(self, request):
+        image_file = request.FILES.get('image_file', '')
+        if not image_file:
+            return to_json_data(errno=Code.PARAMERR, errmsg='未选择图片上传')
+        if image_file.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
+            return to_json_data(errno=Code.PARAMERR, errmsg='不能上传非图片类型！')
+        try:
+            image_ext_name = image_file.name.split('.')[-1]
+        except Exception as e:
+            logger.info('获取图片扩展名异常：{}'.format(e))
+            image_ext_name = 'jpg'
+        # image_file.read():读取文件
+        result = FDFS_Client.upload_by_buffer(image_file.read(), image_ext_name)
+        if result['Status'] == 'Upload successed.':
+            image_url = settings.FASTDFS_SERVER_DOMAIN + result['Remote file_id']
+            return to_json_data(data={'image_url': image_url}, errmsg='图片上传成功！')
+        else:
+            logger.info('图片上传到FastDFS服务器失败')
+            return to_json_data(errno=Code.UNKOWNERR, errmsg='上传图片到服务器失败！')
+
+
+class UploadToken(View):
+    """七牛云上传图片需要调用token"""
+    def get(self, request):
+        access_key = qiniu_secrets_info.QI_NIU_ACCESS_KEY
+        secret_key = qiniu_secrets_info.QI_NIU_SECRET_KEY
+        bucket_name = qiniu_secrets_info.QI_NIU_BUCKET_NAME
+        # 构建鉴权对象
+        q = qiniu.Auth(access_key, secret_key)
+        token = q.upload_token(bucket_name)
+        return JsonResponse({'uptoken': token})
+
+
+class BannerManageView(View):
+    def get(self, request):
+        banners = models.Banner.objects.only('id', 'priority', 'image_url').filter(is_delete=False)
+        priority_dict = dict(models.Banner.CHOICES)
+        return render(request, 'admin/news/news_banner.html', locals())
+
+
+class BannerEditView(View):
+    def delete(self, request, banner_id):
+        banner = models.Banner.objects.only('id').filter(id=banner_id).first()
+        if banner:
+            banner.is_delete = True
+            banner.save(update_fields=['is_delete', 'update_time'])
+            return to_json_data(errmsg='轮播图删除成功！')
+        else:
+            return to_json_data(errno=Code.NODATA, errmsg='要删除的轮播图不存在！')
+
+    def put(self, request, banner_id):
+        banner = models.Banner.objects.only('id').filter(id=banner_id).first()
+        if not banner:
+            return to_json_data(errno=Code.NODATA, errmsg='要更新的轮播图不存在！')
+        json_data = request.body
+        if not json_data:
+            return to_json_data(errno=Code.NODATA, errmsg=error_map[Code.NODATA])
+        dict_data = json.loads(json_data.decode('utf8'))
+        try:
+            priority = int(dict_data.get('priority'))
+            if priority:
+                priority_list = [i for i, _ in models.Banner.CHOICES]
+                if priority not in priority_list:
+                    return to_json_data(errno=Code.PARAMERR, errmsg='优先级设置错误！')
+            else:
+                return to_json_data(Code.NODATA, errmsg='优先级设置错误！')
+        except Exception as e:
+            logger.info('获取优先级出错：{}'.format(e))
+            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+        image_url = dict_data.get('image_url')
+        if not image_url:
+            return to_json_data(errno=Code.NODATA, errmsg='未上传图片！')
+        banner.priority = priority
+        banner.image_url = image_url
+        banner.save()
+        return to_json_data(errmsg='轮播图更新成功！')
+
+
+class BannerAddView(View):
+    def get(self, request):
+        tags = models.Tag.objects.only('id', 'name').filter(is_delete=False)
+        priority_dict = dict(models.Banner.CHOICES)
+        return render(request, 'admin/news/news_banner_add.html', locals())
+
+    def post(self, request):
+        json_data = request.body
+        if not json_data:
+            return to_json_data(errno=Code.NODATA, errmsg=error_map[Code.NODATA])
+        dict_data = json.loads(json_data.decode('utf8'))
+        try:
+            priority = int(dict_data.get('priority'))
+            if priority:
+                priority_list = [i for i, _ in models.Banner.CHOICES]
+                if priority not in priority_list:
+                    return to_json_data(errno=Code.PARAMERR, errmsg='优先级设置错误！')
+            else:
+                return to_json_data(Code.NODATA, errmsg='优先级设置错误！')
+        except Exception as e:
+            logger.info('获取优先级出错：{}'.format(e))
+            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+        try:
+            news_id = int(dict_data.get('news_id'))
+            if news_id:
+                if not models.News.objects.only('id').filter(id=news_id, is_delete=False).exists():
+                    return to_json_data(errno=Code.DATAERR, errmsg='该文章不存在！')
+                if models.Banner.objects.filter(news_id=news_id).exists():
+                    return to_json_data(errno=Code.DATAEXIST, errmsg='关联该文章的轮播图已存在！')
+            else:
+                return to_json_data(errno=Code.PARAMERR, errmsg='文章设置错误！')
+        except Exception as e:
+            logger.info('获取文章id出错：{}'.format(e))
+            return to_json_data(errno=Code.PARAMERR, errmsg='文章设置错误！')
+        image_url = dict_data.get('image_url')
+        if not image_url:
+            return to_json_data(errno=Code.NODATA, errmsg='未上传图片！')
+        banner = models.Banner()
+        banner.news_id = news_id
+        banner.image_url = image_url
+        banner.priority = priority
+        banner.save()
+        return to_json_data(errmsg='轮播图添加成功！')

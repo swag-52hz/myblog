@@ -82,7 +82,7 @@ $(function () {
     })
       .done(function (res) {
         if (res.errno === "0") {
-          message.showSuccess("更新成功");
+          message.showSuccess("轮播图更新成功");
           // fAlert.alertSuccessToast("更新成功");
 
           setTimeout(function () {

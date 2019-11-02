@@ -1,5 +1,7 @@
 import logging
 import json
+
+import pytz
 from django.shortcuts import render
 from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -47,6 +49,10 @@ class NewsListView(View):
             news_info = paginator.page(paginator.num_pages)
         news_info_list = []
         for item in news_info:
+            # 将时区转换为中国上海
+            shanghai_tz = pytz.timezone('Asia/Shanghai')
+            # 转换为本地时间
+            local_time = shanghai_tz.normalize(item.update_time)
             news_info_list.append(
                 {
                     'id': item.id,
@@ -54,7 +60,7 @@ class NewsListView(View):
                     'digest': item.digest,
                     'author': item.author.username,
                     'tag_name': item.tag.name,
-                    'update_time': item.update_time.strftime('%Y年%m月%d日 %H:%M'),
+                    'update_time': local_time.strftime('%Y年%m月%d日 %H:%M'),
                     'image_url': item.image_url
                 }
             )
@@ -93,8 +99,8 @@ class NewsDetailView(View):
             news.clicks = int(news.clicks) + 1
             news.save(update_fields=['clicks', 'update_time'])
             comments = models.Comments.objects.select_related('author', 'parent').\
-                only('content', 'author__username', 'update_time', 'parent__content',
-                     'parent__author__username', 'parent__update_time').filter(is_delete=False, news_id=news_id)
+                only('content', 'author__username', 'author__avatar_url', 'update_time', 'parent__content',
+                     'parent__author__username', 'parent__author__avatar_url', 'parent__update_time').filter(is_delete=False, news_id=news_id)
             comments_list = []
             comment_count = comments.count()
             for comm in comments:

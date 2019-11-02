@@ -216,7 +216,7 @@ desired effect
                   <a href="#" class="btn btn-default btn-flat">个人档案</a>
                 </div>
                 <div class="pull-right">
-                  <a href="#" class="btn btn-default btn-flat">退出登录</a>
+                  <a href="{% url 'news:index' %}" class="btn btn-default btn-flat">退出后台</a>
                 </div>
               </li>
             </ul>
@@ -226,6 +226,7 @@ desired effect
       </div>
     </nav>
   </header>
+    {% block menu %}
   <!-- Left side column. contains the logo and sidebar -->
   <aside class="main-sidebar">
 
@@ -257,6 +258,7 @@ desired effect
       <!-- /.search form -->
 
       <!-- Sidebar Menu -->
+
       <ul class="sidebar-menu" data-widget="tree">
         <li class="header">主菜单</li>
         <!-- Optionally, you can add icons to the links -->
@@ -280,7 +282,7 @@ desired effect
 
             <!-- 文章发布 start -->
             <li>
-              <a href="#">
+              <a href="{% url 'admin:news_pub' %}">
                 <i class="fa fa-newspaper-o"></i>
                 <span>文章发布</span>
               </a>
@@ -307,7 +309,7 @@ desired effect
 
             <!-- 轮播图管理 start -->
             <li>
-              <a href="#">
+              <a href="{% url 'admin:banners' %}">
                 <i class="fa fa-file-picture-o"></i>
                 <span>轮播图管理</span>
               </a>
@@ -328,11 +330,12 @@ desired effect
         <li class="active"><a href="#"><i class="fa fa-user-plus"></i> <span>组创建</span></a></li>
         <li class="active"><a href="#"><i class="fa fa-male"></i> <span>用户管理</span></a></li>
       </ul>
+
       <!-- /.sidebar-menu -->
     </section>
     <!-- /.sidebar -->
   </aside>
-
+    {% endblock %}
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->

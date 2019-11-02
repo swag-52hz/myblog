@@ -1,0 +1,65 @@
+{% extends 'base/base.html' %}
+{% block title %}
+    个人中心
+{% endblock %}
+{% block link %}
+    <link rel="stylesheet" href="{% static 'css/users/profile.css' %}">
+{% endblock %}
+{% block main %}
+    <div class="profile-box">
+        <ul class="aside-box">
+            <li class="item"><a href="{% url 'users:profile' %}">个人资料</a></li>
+            <li class="item"><a href="#">我的收藏</a></li>
+            <li class="item"><a href="#">我的关注</a></li>
+            <li class="item"><a href="#">我的粉丝</a></li>
+            <li class="item"><a href="#">我的标签</a></li>
+            <li class="item"><a href="{% url 'users:blog' %}">我的博客</a></li>
+            <li class="item"><a href="#">我的下载</a></li>
+            <li class="item"><a href="#">我的评论</a></li>
+        </ul>
+        <div class="main-box">
+            {% block main-box %}
+            <h3 class="part-title">个人资料</h3>
+            <div class="personal-box">
+                <div class="img-box">
+                    <img id="user-img" src="{{ user.avatar_url }}" alt="">
+                    <a href="#">修改头像</a>
+                    <input type="file" name="avatar_url" id="upload-news-thumbnail">
+                </div>
+            </div>
+            <div class="message-box">
+                <p class="user-account">用户名：{{ user.username }}</p>
+                <p class="care-about">关注：<span>0</span>  粉丝：<span>0</span></p>
+                <p class="get-vip"><a href="#">开通会员</a><span>*温馨提示：会员显示时间更新有延迟，请稍后再查看</span></p>
+                <div class="user-info">
+                    <p>手机号：{{ user.phone }}<a href="#">修改资料</a></p>
+                    <p>实名：</p>
+                    <p>性别：</p>
+                    <p>生日：</p>
+                    <p>地区：</p>
+                    <p>行业：</p>
+                    <p>职位：</p>
+                    <p>简介：自律决定了你未来的高度！</p>
+                </div>
+            </div>
+            {% endblock %}
+        </div>
+    </div>
+    <script>
+        let nav = document.getElementsByClassName('item');
+        {% block index %}
+        let index = 0;
+        {% endblock %}
+        nav[index].id = "check";
+        for (let i = 0; i < nav.length; i++) {
+            nav[i].onclick = function () {
+                nav[index].id = "";
+                index = i;
+                nav[index].id = "check";
+            }
+        }
+    </script>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'js/users/upload_image.js' %}"></script>
+{% endblock %}

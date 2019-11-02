@@ -1,5 +1,6 @@
 from django.db import models
 import pytz
+from django.core.validators import MinLengthValidator
 from utils.model_base import ModelBase
 
 
@@ -17,8 +18,8 @@ class Tag(ModelBase):
 
 
 class News(ModelBase):
-    title = models.CharField(max_length=200, verbose_name='文章标题', help_text='文章标题')
-    digest = models.CharField(max_length=200, verbose_name='文章摘要', help_text='文章摘要')
+    title = models.CharField(max_length=150, validators=[MinLengthValidator(1)], verbose_name='文章标题', help_text='文章标题')
+    digest = models.CharField(max_length=200, validators=[MinLengthValidator(1)], verbose_name='文章摘要', help_text='文章摘要')
     content = models.TextField(verbose_name='文章内容', help_text='文章内容')
     clicks = models.IntegerField(default=0, verbose_name='访问量', help_text='访问量')
     image_url = models.URLField(default='', verbose_name='文章缩略图', help_text='文章缩略图')
@@ -53,6 +54,7 @@ class Comments(ModelBase):
             'content': self.content,
             'update_time': local_time.strftime("%Y-%m-%d %H:%M"),
             'author': self.author.username,
+            'avatar_url': self.author.avatar_url,
             'parent': self.parent.to_dict_data() if self.parent else None
         }
         return comment_dict
@@ -100,7 +102,7 @@ class Banner(ModelBase):
     news = models.OneToOneField('News', on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ['-priority', '-update_time', '-id']
+        ordering = ['priority', '-update_time', '-id']
         db_table = 'tb_banner'
         verbose_name = '轮播图'
         verbose_name_plural = verbose_name

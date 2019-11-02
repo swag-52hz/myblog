@@ -1,0 +1,68 @@
+{% extends 'users/profile.html' %}
+{% block title %}
+    我的博客
+{% endblock %}
+{% block link %}
+    <link rel="stylesheet" href="{% static 'css/users/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/user_blog.css' %}">
+{% endblock %}
+{% block main-box %}
+    <div class="filter-box">
+        <form action="/users/blog/" method="post">
+        {% csrf_token %}
+        请选择时间段：<input type="date" name="start_time">-<input type="date" name="end_time">
+        文章标签：<select class="form-control" id="tag" name="tag_id">
+           <option value="0">--请选择标签--</option>
+           {% for one_tag in tags %}
+
+             {% if tag_id and one_tag.id == tag_id %}
+               <option value="{{ one_tag.id }}" selected>{{ one_tag.name }}</option>
+             {% else %}
+               <option value="{{ one_tag.id }}">{{ one_tag.name }}</option>
+             {% endif %}
+
+           {% endfor %}
+         </select>
+        <input type="text" name="title" placeholder="请输入文章标题"> <button type="submit">搜索</button>
+            <a href="{% url 'users:blog' %}">重置</a>
+        </form>
+    </div>
+    <ul class="news-list">
+        {% for count, news in dict_data.items %}
+        <li class="news-item">
+            <div class="news-title"><a href="{% url 'news:news_detail' news.id %}">{{ news.title }}</a></div>
+            <div class="news-box">
+                <div class="news-info">
+                    <span>{{ news.tag.name }}</span>
+                    <span>{{ news.update_time }}</span>
+                    <span><i class="fa fa-commenting-o" aria-hidden="true"></i>  {{ count }}</span>
+                    <span><i class="fa fa-eye" aria-hidden="true"></i> {{ news.clicks }}</span>
+                </div>
+                <div class="handle-box">
+                    <a href="#">编辑</a>
+                    <a href="#">置顶</a>
+                    <a class="delete" href="#">删除</a>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% if num > 10 %}
+    <ul class="page-box">
+        <li><a class="first-last" href="{{ request.path }}?page=1">返回首页</a></li>
+        <li>
+            <a {% if page_num == 1 %}class="disabled"{% endif %} href="{{ request.path }}?page={{ page_num|add:'-1' }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i></a>
+        </li>
+        {% for page in page_list %}
+            <li {% if page == page_num %}class="current_page"{% endif %}>
+                <a href="{{ request.path }}?page={{ page }}">{{ page }}</a>
+            </li>
+        {% endfor %}
+        <li><a {% if page_num == total_page %}class="disabled"{% endif %} href="{{ request.path }}?page={{ page_num|add:'1' }}"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i></a></li>
+        <li><a class="first-last" href="{{ request.path }}?page={{ total_page }}">跳到末页</a></li>
+    </ul>
+    {% endif %}
+{% endblock %}
+{% block index %}
+    let index = 5;
+{% endblock %}

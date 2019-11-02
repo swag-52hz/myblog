@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/base/side.css' %}">
     {% block link %}{% endblock %}
     <link rel="stylesheet" href="http://at.alicdn.com/t/font_684044_un7umbuwwfp.css">
+    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
 <!-- header start -->
@@ -39,9 +40,11 @@
                     <p class="user-name">{{ user.username }}</p>
                     <ul class="author-menu">
                         {% if user.is_staff %}
-                        <li><a href="{% url 'admin:index' %}">后台管理</a></li>
+                        <li><a href="{% url 'admin:index' %}"><i class="fa fa-wrench" aria-hidden="true"></i> 后台管理</a></li>
                         {% endif %}
-                        <li><a href="{% url 'users:logout' %}">退出登录</a></li>
+                        <li><a href="{% url 'users:news_pub' %}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> 发布博客</a></li>
+                        <li><a href="{% url 'users:profile' %}" target="_blank"><i class="fa fa-user-circle" aria-hidden="true"></i> 个人中心</a></li>
+                        <li><a href="{% url 'users:logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i> 退出登录</a></li>
                     </ul>
                 </div>
             {% else %}
