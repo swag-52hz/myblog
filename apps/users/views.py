@@ -8,7 +8,7 @@ from utils.fastdfs.client import FDFS_Client
 from utils.json_fun import to_json_data
 from utils.res_code import Code, error_map
 from utils.paginator.paginator_func import get_page_list
-from .forms import RegisterForm, LoginForm
+from .forms import RegisterForm, LoginForm, NewsPubForm
 from django.db.models import Q
 from .models import User
 from news.models import News, Tag, Comments
@@ -180,5 +180,24 @@ class UploadImage(View):
 class NewsPubView(View):
     def get(self, request):
         tags = Tag.objects.only('id', 'name').filter(is_delete=False)
-        return render(request, 'admin/news/news_pub.html', locals())
+        return render(request, 'users/news_pub.html', locals())
 
+    def post(self, request):
+        json_data = request.body
+        if not json_data:
+            return to_json_data(errno=Code.NODATA, errmsg=error_map[Code.NODATA])
+        dict_data = json.loads(json_data.decode('utf8'))
+        form = NewsPubForm(data=dict_data)
+        if form.is_valid():
+            # 延缓保存
+            news_instance = form.save(commit=False)
+            news_instance.author = request.user
+            news_instance.save()
+            # return to_json_data(errmsg='文章发布成功！')
+            return redirect(reverse('news:index') + '/' + str(news_instance.id))
+        else:
+            err_msg_list = []
+            for item in form.errors.get_json_data().values():
+                err_msg_list.append(item[0].get('message'))
+            err_msg_str = '/'.join(err_msg_list)
+            return to_json_data(errno=Code.DATAERR, errmsg=err_msg_str)

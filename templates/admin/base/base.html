@@ -61,6 +61,7 @@ desired effect
 <div class="wrapper">
 
   <!-- Main Header -->
+    {% block head %}
   <header class="main-header">
 
     <!-- Logo -->
@@ -226,6 +227,7 @@ desired effect
       </div>
     </nav>
   </header>
+    {% endblock %}
     {% block menu %}
   <!-- Left side column. contains the logo and sidebar -->
   <aside class="main-sidebar">
@@ -318,8 +320,8 @@ desired effect
           </ul>
         </li>
           <li class="header">文档相关</li>
-        <li class="active"><a href="#"><i class="fa fa-book"></i> <span>文档管理</span></a></li>
-        <li class="active"><a href="#"><i class="fa fa-cog"></i> <span>文档发布</span></a></li>
+        <li class="active"><a href="{% url 'admin:doc' %}"><i class="fa fa-book"></i> <span>文档管理</span></a></li>
+        <li class="active"><a href="{% url 'admin:doc_pub' %}"><i class="fa fa-cog"></i> <span>文档发布</span></a></li>
 
         <li class="header">在线课堂</li>
         <li class="active"><a href="#"><i class="fa fa-file-movie-o"></i> <span>课程管理</span></a></li>

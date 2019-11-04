@@ -19,4 +19,8 @@ urlpatterns = [
     path('banners/', views.BannerManageView.as_view(), name='banners'),
     path('banners/<int:banner_id>/', views.BannerEditView.as_view(), name='banners_edit'),
     path('banners/add/', views.BannerAddView.as_view(), name='banner_add'),
+    path('docs/', views.DocManageView.as_view(), name='doc'),
+    path('docs/<int:doc_id>/', views.DocEditView.as_view(), name='docs_edit'),
+    path('docs/pub/', views.DocPubView.as_view(), name='doc_pub'),
+    path('docs/files/', views.DocUploadFiles.as_view(), name='upload_files')
 ]

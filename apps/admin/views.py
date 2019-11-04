@@ -6,12 +6,13 @@ from urllib.parse import urlencode
 import qiniu
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Count
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.shortcuts import render
 from django.views import View
 
 from myblog import settings
 from news import models
+from doc.models import Docs
 from utils.qiniu_secrets import qiniu_secrets_info
 from . import constants
 from . import forms
@@ -279,7 +280,7 @@ class NewsEditView(View):
 class NewsPubView(View):
     def get(self, request):
         tags = models.Tag.objects.only('id', 'name').filter(is_delete=False)
-        return render(request, 'users/news_pub.html', locals())
+        return render(request, 'admin/news/news_pub.html', locals())
 
     def post(self, request):
         json_data = request.body
@@ -292,7 +293,7 @@ class NewsPubView(View):
             news_instance = form.save(commit=False)
             news_instance.author = request.user
             news_instance.save()
-            return to_json_data(errmsg='文章添加成功！')
+            return to_json_data(errmsg='文章发布成功！')
         else:
             err_msg_list = []
             for item in form.errors.get_json_data().values():
@@ -423,3 +424,94 @@ class BannerAddView(View):
         banner.priority = priority
         banner.save()
         return to_json_data(errmsg='轮播图添加成功！')
+
+
+class DocManageView(View):
+    def get(self, request):
+        docs = Docs.objects.only('id', 'title', 'update_time').filter(is_delete=False)
+        return render(request, 'admin/doc/docs_manage.html', locals())
+
+
+class DocEditView(View):
+    def get(self, request, doc_id):
+        doc = Docs.objects.filter(id=doc_id, is_delete=False).first()
+        if not doc:
+            return Http404('要编辑的文档不存在！')
+        return render(request, 'admin/doc/docs_pub.html', locals())
+
+    def delete(self, request, doc_id):
+        doc = Docs.objects.filter(is_delete=False, id=doc_id).first()
+        if not doc:
+            return to_json_data(errno=Code.NODATA, errmsg='要删除的文档不存在！')
+        doc.is_delete = True
+        doc.save(update_fields=['is_delete', 'update_time'])
+        return to_json_data(errmsg='文档删除成功！')
+
+    def put(self, request, doc_id):
+        doc = Docs.objects.filter(id=doc_id, is_delete=False).first()
+        if not doc:
+            return to_json_data(errno=Code.NODATA, errmsg='要更新的文档不存在！')
+        json_data = request.body
+        if not json_data:
+            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+        dict_data = json.loads(json_data.decode('utf8'))
+        form = forms.DocsPubForm(data=dict_data)
+        if form.is_valid():
+            for key, value in form.cleaned_data.items():
+                setattr(doc, key, value)
+            doc.save()
+            return to_json_data(errmsg='文档更新成功！')
+        else:
+            err_msg_list = []
+            for item in form.errors.get_json_data().values():
+                err_msg_list.append(item[0].get('message'))
+            err_msg_str = '/'.join(err_msg_list)
+            return to_json_data(errno=Code.DATAERR, errmsg=err_msg_str)
+
+
+class DocUploadFiles(View):
+    def post(self, request):
+        text_file = request.FILES.get('text_file')
+        if not text_file:
+            return to_json_data(errno=Code.PARAMERR, errmsg='未选择文件上传')
+        if text_file.content_type not in ('application/octet-stream', 'application/pdf', 'application/msword',
+                                          'application/zip', 'text/plain', 'application/x-rar'):
+            return to_json_data(errno=Code.PARAMERR, errmsg='不能上传非文档类型的文件！')
+        try:
+            text_ext_name = text_file.name.split('.')[-1]
+        except Exception as e:
+            logger.info('获取文档扩展名异常：{}'.format(e))
+            text_ext_name = 'jpg'
+        try:
+            result = FDFS_Client.upload_by_buffer(text_file.read(), text_ext_name)
+        except Exception as e:
+            logger.info('文档上传出现异常：{}'.format(e))
+            return to_json_data(errno=Code.UNKOWNERR, errmsg='文档上传出现异常！')
+        if result['Status'] == 'Upload successed.':
+            text_url = settings.FASTDFS_SERVER_DOMAIN + result['Remote file_id']
+            return to_json_data(data={'text_file': text_url}, errmsg='文档上传成功！')
+        else:
+            logger.info('文档上传到FastDFS服务器失败')
+            return to_json_data(errno=Code.UNKOWNERR, errmsg='上传文档到服务器失败！')
+
+class DocPubView(View):
+    def get(self, request):
+        return render(request, 'admin/doc/docs_pub.html')
+
+    def post(self, request):
+        json_data = request.body
+        if not json_data:
+            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+        dict_data = json.loads(json_data.decode('utf8'))
+        form = forms.DocsPubForm(data=dict_data)
+        if form.is_valid():
+            doc_instance = form.save(commit=False)
+            doc_instance.author = request.user
+            doc_instance.save()
+            return to_json_data(errmsg='文档创建成功！')
+        else:
+            err_msg_list = []
+            for item in form.errors.get_json_data().values():
+                err_msg_list.append(item[0].get('message'))
+            err_msg_str = '/'.join(err_msg_list)
+            return to_json_data(errno=Code.DATAERR, errmsg=err_msg_str)

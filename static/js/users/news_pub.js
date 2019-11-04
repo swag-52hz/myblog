@@ -78,7 +78,7 @@ $(function () {
 
   // ================== 发布文章 ================
   let $newsBtn = $("#btn-pub-news");
-  $newsBtn.click(function () {
+  $newsBtn.unbind('click').bind('click', function () {
     // 判断文章标题是否为空
     let sTitle = $("#news-title").val();  // 获取文章标题
     if (!sTitle) {
@@ -113,7 +113,7 @@ $(function () {
 
     // 获取news_id 存在表示更新 不存在表示发表
     let newsId = $(this).data("news-id");
-    let url = newsId ? '/admin/news/' + newsId + '/' : '/admin/news/pub/';
+    let url = newsId ? '/admin/news/' + newsId + '/' : '/users/news/pub/';
     let data = {
       "title": sTitle,
       "digest": sDesc,

@@ -1,14 +1,12 @@
 $(function () {
-  // let $e = window.wangEditor;
-  // window.editor = new $e('#news-content');
-  // window.editor.create();
 
-  // 获取缩略图输入框元素
-  let $thumbnailUrl = $("#news-thumbnail-url");
+  let $thumbnailUrl = $("#news-thumbnail-url");   // 获取缩略图输入框元素
+  let $docFileUrl = $("#docs-file-url");    // 获取文档地址输入框元素
 
   // ================== 上传图片文件至服务器 ================
-  let $upload_to_server = $("#upload-news-thumbnail");
-  $upload_to_server.change(function () {
+  let $upload_image_server = $("#upload-image-server");
+  $upload_image_server.change(function () {
+    // let _this = this;
     let file = this.files[0];   // 获取文件
     let oFormData = new FormData();  // 创建一个 FormData
     oFormData.append("image_file", file); // 把文件添加进去
@@ -22,12 +20,42 @@ $(function () {
     })
       .done(function (res) {
         if (res.errno === "0") {
-          // 更新标签成功
           message.showSuccess("图片上传成功");
-          let sImageUrl = res["data"]["image_url"];
-          // console.log(thumbnailUrl);
+          let sImageUrl = res.data.image_url;
           $thumbnailUrl.val('');
           $thumbnailUrl.val(sImageUrl);
+
+        } else {
+          message.showError(res.errmsg)
+        }
+      })
+      .fail(function () {
+        message.showError('服务器超时，请重试！');
+      });
+
+  });
+  // ================== 上传文件至服务器 ================
+  let $upload_file_server = $("#upload-file-server");
+  $upload_file_server.change(function () {
+    // let _this = this;
+    let file = this.files[0];   // 获取文件
+    let oFormData = new FormData();  // 创建一个 FormData
+    oFormData.append("text_file", file); // 把文件添加进去
+    // 发送请求
+    $.ajax({
+      url: "/admin/docs/files/",
+      method: "POST",
+      data: oFormData,
+      processData: false,   // 定义文件的传输
+      contentType: false,
+    })
+      .done(function (res) {
+        if (res.errno === "0") {
+          message.showSuccess("文件上传成功");
+          let sTextFileUrl = res.data.text_file;
+          $docFileUrl.val('');
+          $docFileUrl.val(sTextFileUrl);
+
         } else {
           message.showError(res.errmsg)
         }
@@ -39,21 +67,25 @@ $(function () {
   });
 
 
-  // ================== 上传至七牛（云存储平台） ================
+  // ================== 上传图片至七牛（云存储平台） ================
   let $progressBar = $(".progress-bar");
   QINIU.upload({
-    "domain": "http://q043wthpc.bkt.clouddn.com/",  // 七牛空间域名
-    "uptoken_url": "/admin/token/",	 // 后台返回 token的地址
-    "browse_btn": "upload-btn",		// 按钮
-    "success": function (up, file, info) {	 // 成功
+    "domain": "http://prjf5vb0u.bkt.clouddn.com/",  // 七牛空间域名
+    // 后台返回 token的地址 (后台返回的 url 地址) 不可能成功
+    "uptoken_url": "/admin/token/",
+    // 按钮
+    "browse_btn": "upload-image-btn",
+    // 成功
+    "success": function (up, file, info) {
       let domain = up.getOption('domain');
       let res = JSON.parse(info);
       let filePath = domain + res.key;
-      console.log(filePath);
+      console.log(filePath);  // 打印文件路径
       $thumbnailUrl.val('');
       $thumbnailUrl.val(filePath);
       message.showSuccess("图片上传成功");
     },
+    // 失败
     "error": function (up, err, errTip) {
       // console.log('error');
       console.log(up);
@@ -68,6 +100,7 @@ $(function () {
       $progressBar.css("width", percent + '%');
       $progressBar.text(parseInt(percent) + '%');
     },
+    // 完成后 去掉进度条
     "complete": function () {
       $progressBar.parent().css("display", 'none');
       $progressBar.css("width", '0%');
@@ -76,57 +109,53 @@ $(function () {
   });
 
 
+
   // ================== 发布文章 ================
-  let $newsBtn = $("#btn-pub-news");
-  $newsBtn.click(function () {
-    // 判断文章标题是否为空
-    let sTitle = $("#news-title").val();  // 获取文章标题
+  let $docsBtn = $("#btn-pub-news");
+  $docsBtn.click(function () {
+    // 判断文档标题是否为空
+    let sTitle = $("#news-title").val();  // 获取文件标题
     if (!sTitle) {
-        message.showError('请填写文章标题！');
-        return
-    }
-    // 判断文章摘要是否为空
-    let sDesc = $("#news-desc").val();  // 获取文章摘要
-    if (!sDesc) {
-        message.showError('请填写文章摘要！');
+        message.showError('请填写文档标题！');
         return
     }
 
-    let sTagId = $("#news-category").val();
-    if (!sTagId || sTagId === '0') {
-      message.showError('请选择文章标签');
-      return
-    }
-
+    // 判断文档缩略图url是否为空
     let sThumbnailUrl = $thumbnailUrl.val();
     if (!sThumbnailUrl) {
-      message.showError('请上传文章缩略图');
+      message.showError('请上传文档缩略图');
       return
     }
-    let sContentHtml = $(".markdown-body").html();
-    console.log(sContentHtml);
-    // let sContentHtml = $("#content").val();
-    if (!sContentHtml || sContentHtml === '<p><br></p>') {
-        message.showError('请填写文章内容！');
+
+    // 判断文档描述是否为空
+    let sDesc = $("#news-desc").val();  // 获取文档描述
+    if (!sDesc) {
+        message.showError('请填写文档描述！');
         return
     }
 
-    // 获取news_id 存在表示更新 不存在表示发表
-    let newsId = $(this).data("news-id");
-    let url = newsId ? '/admin/news/' + newsId + '/' : '/admin/news/pub/';
+    // 判断文档url是否为空
+    let sDocFileUrl = $docFileUrl.val();
+    if (!sDocFileUrl) {
+      message.showError('请上传文档或输入文档地址');
+      return
+    }
+
+    // 获取docsId 存在表示更新 不存在表示发表
+    let docsId = $(this).data("news-id");
+    let url = docsId ? '/admin/docs/' + docsId + '/' : '/admin/docs/pub/';
     let data = {
       "title": sTitle,
-      "digest": sDesc,
-      "tag": sTagId,
+      "desc": sDesc,
       "image_url": sThumbnailUrl,
-      "content": sContentHtml,
+      "file_url": sDocFileUrl,
     };
 
     $.ajax({
       // 请求地址
       url: url,
       // 请求方式
-      type: newsId ? 'PUT' : 'POST',
+      type: docsId ? 'PUT' : 'POST',
       data: JSON.stringify(data),
       // 请求内容的数据类型（前端发给后端的格式）
       contentType: "application/json; charset=utf-8",
@@ -135,18 +164,15 @@ $(function () {
     })
       .done(function (res) {
         if (res.errno === "0") {
-          if (newsId) {
-              message.showSuccess("文章更新成功");
-              setTimeout(function () {
-                window.location.reload();
-                }, 1000)
+          if (docsId) {
+            fAlert.alertNewsSuccessCallback("文档更新成功", '跳到文档管理页', function () {
+              window.location.href = '/admin/docs/'
+            });
 
           } else {
-              message.showSuccess("文章添加成功");
-              alert('文章发布成功！');
-              setTimeout(function () {
-                window.location.href='http://127.0.0.1:8000/';
-                }, 1000)
+            fAlert.alertNewsSuccessCallback("文档发表成功", '跳到文档管理页', function () {
+              window.location.href = '/admin/docs/'
+            });
           }
         } else {
           fAlert.alertErrorToast(res.errmsg);
@@ -155,6 +181,7 @@ $(function () {
       .fail(function () {
         message.showError('服务器超时，请重试！');
       });
+
   });
 
 

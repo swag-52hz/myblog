@@ -1,4 +1,5 @@
 from django import forms
+from doc.models import Docs
 from news.models import Tag, News
 
 
@@ -27,5 +28,26 @@ class NewsPubForm(forms.ModelForm):
             },
             'content': {
                 'required': '文章内容不能为空！',
+            }
+        }
+
+
+class DocsPubForm(forms.ModelForm):
+    image_url = forms.URLField(label='文档封面图url', error_messages={'required': '图片url不能为空'})
+    file_url = forms.URLField(label='文档url', error_messages={'required':'文档url不能够为空'})
+
+    class Meta:
+        model = Docs
+        fields = ['title', 'desc', 'image_url', 'file_url']
+        error_messages = {
+            'title':{
+                'max_length': '文档标题长度不能超过200',
+                'min_length': '文档标题长度不能小于1',
+                'required': '文档标题不能为空！'
+            },
+            'desc':{
+                'max_length': '文档描述长度不能超过200',
+                'min_length': '文档描述长度不能小于1',
+                'required': '文档描述不能为空！'
             }
         }

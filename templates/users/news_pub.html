@@ -4,13 +4,60 @@
 {% block title %}
     博客发布页
 {% endblock %}
+{% block head %}
+<!-- header start -->
+<header id="header">
+    <div class="mw1200 header-contain clearfix">
+        <!-- logo start -->
+        <h1 class="logo">
+            <a href="javascript:void(0);" class="logo-title">Python</a>
+        </h1>
+        <!-- logo end -->
+        <!-- nav start -->
+        <nav class="nav">
+            <ul class="menu">
+                <li><a href="{% url 'news:index' %}">首页</a></li>
+                <li><a href="{% url 'course:course' %}">在线课堂</a></li>
+                <li><a href="{% url 'doc:doc_index' %}">下载文档</a></li>
+                <li><a href="{% url 'news:search' %}">搜索</a></li>
+            </ul>
+        </nav>
+        <!-- nav end -->
+        <!-- login start -->
+        <div class="login-box">
+            {% if user.is_authenticated %}
+                <div class="author">
+                    <div class="user-img">
+                        <img src="{{ user.avatar_url }}" alt="">
+                    </div>
+                    <p class="user-name">{{ user.username }}</p>
+                    <ul class="author-menu">
+                        {% if user.is_staff %}
+                        <li><a href="{% url 'admin:index' %}"><i class="fa fa-wrench" aria-hidden="true"></i> 后台管理</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'users:news_pub' %}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> 发布博客</a></li>
+                        <li><a href="{% url 'users:profile' %}" target="_blank"><i class="fa fa-user-circle" aria-hidden="true"></i> 个人中心</a></li>
+                        <li><a href="{% url 'users:logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i> 退出登录</a></li>
+                    </ul>
+                </div>
+            {% else %}
+                <div>
+                <i class="PyWhich py-user"></i>
+                <span>
+                  <a href="{% url 'users:login' %}" class="login">登录</a> / <a href="{% url 'users:register' %}"
+                                                                              class="reg">注册</a>
+              </span>
+            </div>
+            {% endif %}
+        </div>
+        <!-- login end -->
+    </div>
+</header>
+<!-- header end -->
+{% endblock %}
 
 {% block content_header %}
-    {% if news %}
-        文章更新
-    {% else %}
-        文章发布
-    {% endif %}
+    博客发布
 {% endblock %}
 
 {% block header_option_desc %}
@@ -20,7 +67,22 @@
 
 {% endblock %}
 {% block link %}
+    <link rel="stylesheet" href="{% static 'css/base/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base/reset.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/markdown_editor/css/editormd.css' %}">
+    <style>
+        .content-wrapper, .main-footer{
+            margin-left: 0;
+        }
+        .box .box-body .form-group label{
+            font-size: 15px;
+            font-weight: bolder;
+            margin-bottom: 10px;
+        }
+        .box .box-body .form-group .input-group label{
+            margin-bottom: 0;
+        }
+    </style>
 {% endblock %}
 {% block content %}
     <div class="row">
@@ -44,7 +106,7 @@
                             <textarea name="news-desc" id="news-desc" placeholder="请输入新闻描述" class="form-control"
                                       style="height: 8rem; resize: none;">{{ news.digest }}</textarea>
                         {% else %}
-                            <textarea name="news-desc" id="news-desc" placeholder="请输入新闻描述" class="form-control"
+                            <textarea name="news-desc" id="news-desc" placeholder="请输入文章描述" class="form-control"
                                       style="height: 8rem; resize: none;"></textarea>
                         {% endif %}
                     </div>
@@ -159,5 +221,5 @@
     <script src="https://cdn.bootcss.com/qiniu-js/1.0.17.1/qiniu.min.js"></script>
 
     <script src="{% static 'js/admin/base/fqiniu.js' %}"></script>
-    <script src="{% static 'js/admin/news/news_pub.js' %}"></script>
+    <script src="{% static 'js/users/news_pub.js' %}"></script>
 {% endblock %}
