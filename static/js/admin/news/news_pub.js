@@ -142,8 +142,7 @@ $(function () {
                 }, 1000)
 
           } else {
-              message.showSuccess("文章添加成功");
-              alert('文章发布成功！');
+              message.showSuccess("文章发布成功");
               setTimeout(function () {
                 window.location.href='http://127.0.0.1:8000/';
                 }, 1000)

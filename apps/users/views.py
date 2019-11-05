@@ -182,22 +182,19 @@ class NewsPubView(View):
         tags = Tag.objects.only('id', 'name').filter(is_delete=False)
         return render(request, 'users/news_pub.html', locals())
 
-    def post(self, request):
-        json_data = request.body
-        if not json_data:
-            return to_json_data(errno=Code.NODATA, errmsg=error_map[Code.NODATA])
-        dict_data = json.loads(json_data.decode('utf8'))
-        form = NewsPubForm(data=dict_data)
-        if form.is_valid():
-            # 延缓保存
-            news_instance = form.save(commit=False)
-            news_instance.author = request.user
-            news_instance.save()
-            # return to_json_data(errmsg='文章发布成功！')
-            return redirect(reverse('news:index') + '/' + str(news_instance.id))
-        else:
-            err_msg_list = []
-            for item in form.errors.get_json_data().values():
-                err_msg_list.append(item[0].get('message'))
-            err_msg_str = '/'.join(err_msg_list)
-            return to_json_data(errno=Code.DATAERR, errmsg=err_msg_str)
+
+class NewsEditView(View):
+    def get(self, request, news_id):
+        news = News.objects.filter(id=news_id, is_delete=False).first()
+        tags = Tag.objects.only('id', 'name').filter(is_delete=False)
+        if not news:
+            return Http404('需要编辑的文章不存在！')
+        return render(request, 'users/news_pub.html', locals())
+
+    def delete(self, request, news_id):
+        news = News.objects.only('id').filter(id=news_id, is_delete=False).first()
+        if not news:
+            return to_json_data(errno=Code.NODATA, errmsg='要删除的文章不存在！')
+        news.is_delete = True
+        news.save(update_fields=['is_delete', 'update_time'])
+        return to_json_data(errmsg='文章删除成功！')

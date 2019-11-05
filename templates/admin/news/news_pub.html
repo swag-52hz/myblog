@@ -107,10 +107,10 @@
                 </div>
                 <div class="box-footer">
                     {% if news %}
-                        <a href="{% url 'admin:news_edit' news.id %}" class="btn btn-primary pull-right"
+                        <a href="javascript: void (0);" class="btn btn-primary pull-right"
                            id="btn-pub-news" data-news-id="{{ news.id }}">更新文章 </a>
                     {% else %}
-                        <a href="{% url 'admin:news_pub' %}" class="btn btn-primary pull-right"
+                        <a href="javascript: void (0);" class="btn btn-primary pull-right"
                            id="btn-pub-news">发布文章 </a>
                     {% endif %}
                 </div>

@@ -5,6 +5,7 @@
 {% block link %}
     <link rel="stylesheet" href="{% static 'css/users/profile.css' %}">
     <link rel="stylesheet" href="{% static 'css/users/user_blog.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/base/sweetalert.css' %}">
 {% endblock %}
 {% block main-box %}
     <div class="filter-box">
@@ -39,9 +40,9 @@
                     <span><i class="fa fa-eye" aria-hidden="true"></i> {{ news.clicks }}</span>
                 </div>
                 <div class="handle-box">
-                    <a href="#">编辑</a>
+                    <a href="{% url 'users:news_edit' news.id %}">编辑</a>
                     <a href="#">置顶</a>
-                    <a class="delete" href="#">删除</a>
+                    <a class="delete" href="javascript: void(0);" data-news-id="{{ news.id }}">删除</a>
                 </div>
             </div>
         </li>
@@ -65,4 +66,9 @@
 {% endblock %}
 {% block index %}
     let index = 5;
+{% endblock %}
+{% block script %}
+    <script src="/static/js/admin/base/fsweetalert.js"></script>
+    <script src="/static/js/admin/base/sweetalert.min.js"></script>
+    <script src="{% static 'js/users/news_edit.js' %}"></script>
 {% endblock %}

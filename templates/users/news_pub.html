@@ -2,7 +2,11 @@
 
 
 {% block title %}
-    博客发布页
+    {% if news %}
+        博客编辑页
+    {% else %}
+        博客发布页
+    {% endif %}
 {% endblock %}
 {% block head %}
 <!-- header start -->
@@ -57,7 +61,11 @@
 {% endblock %}
 
 {% block content_header %}
-    博客发布
+    {% if news %}
+        博客编辑
+    {% else %}
+        博客发布
+    {% endif %}
 {% endblock %}
 
 {% block header_option_desc %}
@@ -166,10 +174,10 @@
                 </div>
                 <div class="box-footer">
                     {% if news %}
-                        <a href="{% url 'admin:news_edit' news.id %}" class="btn btn-primary pull-right"
+                        <a href="javascript: void (0);" class="btn btn-primary pull-right"
                            id="btn-pub-news" data-news-id="{{ news.id }}">更新文章 </a>
                     {% else %}
-                        <a href="{% url 'admin:news_pub' %}" class="btn btn-primary pull-right"
+                        <a href="javascript: void (0);" class="btn btn-primary pull-right"
                            id="btn-pub-news">发布文章 </a>
                     {% endif %}
                 </div>
@@ -221,5 +229,5 @@
     <script src="https://cdn.bootcss.com/qiniu-js/1.0.17.1/qiniu.min.js"></script>
 
     <script src="{% static 'js/admin/base/fqiniu.js' %}"></script>
-    <script src="{% static 'js/users/news_pub.js' %}"></script>
+    <script src="{% static 'js/admin/news/news_pub.js' %}"></script>
 {% endblock %}
