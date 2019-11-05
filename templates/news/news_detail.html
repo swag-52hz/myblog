@@ -10,8 +10,8 @@
       <h1 class="news-title">{{ news.title }}</h1>
       <div class="news-info">
         <div class="news-info-left">
-          <span class="news-author">{{ news.author.username }}</span>
           <span class="news-pub-time">{{ news.update_time }}</span>
+            <span class="news-author"><a href="#">{{ news.author.username }}</a></span>
             <span class="news-pub-time">浏览量：{{ news.clicks }}</span>
           <span class="news-type">{{ news.tag.name }}</span>
         </div>
@@ -69,6 +69,84 @@
         </ul>
       </div>
 
+    </div>
+{% endblock %}
+{% block side %}
+    <div class="aside-box">
+        <div class="head-box d-flex">
+            <div class="avatar-box">
+                <a href="#"><img src="{{ news.author.avatar_url }}" alt=""></a>
+            </div>
+            <div class="user-info">
+                <p><a href="#" class="user-name">{{ news.author.username }}</a></p>
+                <p>
+                    <a href="#" class="home-page">Ta的个人主页 ></a>
+                    <a href="#" class="personal-click common">私信</a>
+                    <a href="#" class="tracking-click common">关注</a>
+                </p>
+            </div>
+        </div>
+        <div class="data-info d-flex">
+            <dl class="text-center">
+                <dt><a href="#">原创</a></dt>
+                <dd><a href="#">{{ news_count }}</a></dd>
+            </dl>
+            <dl class="text-center">
+                <dt><a href="#">粉丝</a></dt>
+                <dd><a href="#">0</a></dd>
+            </dl>
+            <dl class="text-center">
+                <dt><a href="#">获赞</a></dt>
+                <dd><a href="#">0</a></dd>
+            </dl>
+            <dl class="text-center">
+                <dt><a href="#">评论</a></dt>
+                <dd><a href="#">{{ total_comment }}</a></dd>
+            </dl>
+            <dl class="text-center">
+                <dt><a href="#">访问</a></dt>
+                <dd><a href="#">{{ total_clicks }}</a></dd>
+            </dl>
+        </div>
+        <div class="grade-box d-flex">
+            <p><i class="fa fa-line-chart" aria-hidden="true"></i> 等级：<span style="color:orange;">v2</span></p>
+            <p><i class="fa fa-bar-chart" aria-hidden="true"></i> 周排名：<span>13万+</span></p>
+            <p><i class="fa fa-hand-o-right" aria-hidden="true"></i> 积分：<span>178</span></p>
+            <p><i class="fa fa-area-chart" aria-hidden="true"></i> 总排名：<span>31万+</span></p>
+        </div>
+        <div class="article-box d-flex">
+            <h3 class="aside-title">最新文章</h3>
+            <ul class="article-list clearfix">
+                {% for latest in latest_news %}
+                    <li class="article-item"><a href="{% url 'news:news_detail' latest.id %}">{{ latest.title }}</a></li>
+               {% endfor %}
+            </ul>
+        </div>
+        <div class="category-box d-flex">
+            <h3 class="aside-title">分类专栏</h3>
+            <ul class="category-list clearfix">
+                {% for tag, count in data_dict.items %}
+                <li>
+                    <a href="#">
+                        <img src="/media/tag.png" alt="">
+                        <span>{{ tag.name }}</span>
+                        <span class="count">{{ count }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="hot-article d-flex">
+            <h3 class="aside-title">热门文章</h3>
+            <ul class="hot-article-list clearfix">
+                {% for hot in hot_news %}
+                <li>
+                    <a href="{% url 'news:news_detail' hot.id %}">{{ hot.title }}</a>
+                    <p>阅读数：<span>{{ hot.clicks }}</span></p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 {% endblock %}
 {% block script %}

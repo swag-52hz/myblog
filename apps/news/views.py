@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views import View
+from numba import jit
 
 from myblog import settings
 from utils.json_fun import to_json_data
@@ -97,7 +98,24 @@ class NewsDetailView(View):
             filter(is_delete=False, id=news_id).first()
         if news:
             news.clicks = int(news.clicks) + 1
-            news.save(update_fields=['clicks', 'update_time'])
+            news.save(update_fields=['clicks'])
+            # 计算作者的文章数量
+            news_count = models.News.objects.filter(author_id=news.author.id).count()
+            all_news = models.News.objects.filter(author_id=news.author.id)
+            # 获取总评论数，总浏览量
+            total_comment, total_clicks = self.get_count(all_news)
+            # 获取作者最新的五篇文章，若不足五篇则返回所有
+            latest_news = models.News.objects.only('id', 'title').\
+                filter(author_id=news.author.id, is_delete=False).order_by('-update_time')
+            latest_news = latest_news[:5] if latest_news.count() > 5 else latest_news
+            tags = models.Tag.objects.filter(news__author=news.author, is_delete=False)
+            tags = list(set(tags))
+            tags = tags[:5] if len(tags) > 5 else tags
+            data_list = [(tag, models.News.objects.select_related('tag').filter(is_delete=False, tag=tag, author=news.author).count()) for tag in tags]
+            data_dict = dict(data_list)
+            hot_news = models.News.objects.only('id', 'title', 'clicks').\
+                filter(author=news.author, is_delete=False).order_by('-clicks')
+            hot_news = hot_news[:5] if hot_news.count() > 5 else hot_news
             comments = models.Comments.objects.select_related('author', 'parent').\
                 only('content', 'author__username', 'author__avatar_url', 'update_time', 'parent__content',
                      'parent__author__username', 'parent__author__avatar_url', 'parent__update_time').filter(is_delete=False, news_id=news_id)
@@ -108,6 +126,22 @@ class NewsDetailView(View):
             return render(request, 'news/news_detail.html', locals())
         else:
             return Http404('id为{}的文章不存在！！！'.format(news_id))
+
+    @jit
+    def get_count(self, all_news):
+        # 计算所有文章的评论之和
+        total_comment = 0
+        for new in all_news:
+            total_comment += models.Comments.objects.filter(news_id=new.id).count()
+        # 计算所有文章的点击量
+        total_clicks = 0
+        for new in all_news:
+            total_clicks += int(new.clicks)
+            if total_clicks > 400000:
+                total_clicks = '40万+'
+                break
+        return (total_comment, total_clicks)
+
 
 
 class AddCommentsView(View):

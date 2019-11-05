@@ -45,7 +45,7 @@ $(function () {
             html_comment += `
           <li class="comment-item">
             <div class="comment-info clearfix">
-              <img src="/static/images/avatar.jpeg" alt="avatar" class="comment-avatar">
+              <img src="${one_comment.avatar_url}" alt="avatar" class="comment-avatar">
               <span class="comment-user">${one_comment.author}</span>
             </div>
             <div class="comment-content">${one_comment.content}</div>
@@ -71,6 +71,7 @@ $(function () {
             $(".comment-list").prepend(html_comment);
             $this.prev().val('');   // 请空输入框
             $this.parent().hide();  // 关闭评论框
+            window.location.reload()
 
           } else if (res.errno === "4101") {
             // 用户未登录
@@ -150,7 +151,7 @@ $(function () {
           html_comment += `
           <li class="comment-item">
             <div class="comment-info clearfix">
-              <img src="/static/images/avatar.jpeg" alt="avatar" class="comment-avatar">
+              <img src="${one_comment.avatar_url}" alt="avatar" class="comment-avatar">
               <span class="comment-user">${one_comment.author}</span>
             </div>
             <div class="comment-content">${one_comment.content}</div>
@@ -168,6 +169,7 @@ $(function () {
           $(".comment-list").prepend(html_comment);
           $this.prev().val('');   // 请空输入框
           // $this.parent().hide();  // 关闭评论框
+          window.location.reload()
 
         } else if (res.errno === "4101") {
           // 用户未登录

@@ -75,10 +75,12 @@
 .pay-item .pay-price {
     display: block;
     float: right;
-    width: 50px;
+    width: 60px;
+    height: 30px;
     margin-right: 20px;
-    font-size: 18px;
+    font-size: 15px;
     text-align: center;
+    line-height: 30px;
     color: white;
     background-color: coral;
     border-radius: 10px;

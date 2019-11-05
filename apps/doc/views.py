@@ -21,7 +21,10 @@ class DocDownloadView(View):
         doc = Docs.objects.only('file_url').filter(is_delete=False, id=doc_id).first()
         if doc:
             file_url = doc.file_url
-            doc_url = SITE_DOMAIN_PORT + file_url
+            if  '127.0.0.1:8888' in file_url:
+                doc_url = file_url
+            else:
+                doc_url = SITE_DOMAIN_PORT + file_url
             try:
                 # 设置stream=True在下载大文件的时候可以提升下载速度
                 file = requests.get(doc_url, stream=True)
