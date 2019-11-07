@@ -28,6 +28,32 @@
 #course-container {
     flex: 1;
 }
+#course-container .video-category{
+    /*float: left;*/
+    width: 1160px;
+    height: 50px;
+    margin: 10px auto;
+    background-color: rgb(100, 149, 237);
+}
+#course-container .video-category li{
+    float: left;
+    text-align: center;
+    line-height: 50px;
+}
+#course-container .video-category li a{
+    display: block;
+    width: 150px;
+    height: 50px;
+    color: white;
+    font-size: 15px;
+    font-weight: bolder;
+}
+#course-container .video-category li a:hover{
+    background-color: rgb(204, 0, 0);
+}
+#course-container .video-category #check{
+    background-color: rgb(204, 0, 0);
+}
 #course-container .course-list {
     display: flex;
     flex-flow: row wrap;
@@ -51,7 +77,8 @@
     box-sizing: border-box;
 }
 .course-list .course-item:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,.1);
+    top: -5px;
+    box-shadow: 4px 8px 15px black;
     color: orange;
 }
 .course-item .course-content .course-info {

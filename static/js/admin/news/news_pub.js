@@ -2,6 +2,53 @@ $(function () {
   // let $e = window.wangEditor;
   // window.editor = new $e('#news-content');
   // window.editor.create();
+  // 添加标签
+  let $tagAdd = $("#btn-add-tag");  // 1. 获取添加按钮
+  $tagAdd.click(function () {   // 2. 点击事件
+    fAlert.alertOneInput({
+      title: "请输入文章标签",
+      text: "长度限制在20字以内",
+      placeholder: "请输入文章标签",
+      confirmCallback: function confirmCallback(inputVal) {
+        console.log(inputVal);
+
+        if (inputVal === "") {
+          swal.showInputError('标签不能为空');
+          return false;
+        }
+
+        let sDataParams = {
+          "name": inputVal
+        };
+
+        $.ajax({
+          // 请求地址
+          url: "/admin/tags/",  // url尾部需要添加/
+          // 请求方式
+          type: "POST",
+          data: JSON.stringify(sDataParams),
+          // 请求内容的数据类型（前端发给后端的格式）
+          contentType: "application/json; charset=utf-8",
+          // 响应数据的格式（后端返回给前端的格式）
+          dataType: "json",
+        })
+          .done(function (res) {
+            if (res.errno === "0") {
+              fAlert.alertSuccessToast(inputVal + " 标签添加成功");
+              setTimeout(function () {
+                window.location.reload();
+              }, 1000)
+            } else {
+              swal.showInputError(res.errmsg);
+            }
+          })
+          .fail(function () {
+            message.showError('服务器超时，请重试！');
+          });
+
+      }
+    });
+  });
 
   // 获取缩略图输入框元素
   let $thumbnailUrl = $("#news-thumbnail-url");

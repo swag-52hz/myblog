@@ -1,6 +1,6 @@
 {% extends 'base/base.html' %}
 {% block title %}
-    在线课堂
+    在线视频
 {% endblock %}
 {% block link %}
     <link rel="stylesheet" href="{% static 'css/course/course.css' %}">
@@ -8,15 +8,20 @@
 {% block main %}
 <main id="course-container">
         <div class="w1200">
+            <ul class="video-category">
+                {% for type in types %}
+                <li class="category-item"><a href="{% url 'course:course' %}?type={{ type.name }}">{{ type.name }}</a></li>
+                {% endfor %}
+            </ul>
             <ul class="course-list">
                 {% for course in courses %}
                 <li class="course-item">
-                    <a href="{% url 'course:course_detail' course.id %}">
+                    <a href="{% url 'course:course_detail' course.id %}" target="_blank">
                         <img class="course-img" src="{{ course.cover_url }}"
-                            alt="潭州英语">
+                            alt="视频封面图">
                         <div class="course-content">
                             <p class="course-info">{{ course.name }}</p>
-                            <p class="course-author">讲师：{{ course.teacher.name }}</p>
+                            <p class="course-author">{% if course.category_id == 6 %}歌手：{% else %}讲师：{% endif %}{{ course.teacher.name }}</p>
                             <p class="course-price free">免费</p>
                         </div>
                     </a>
@@ -26,4 +31,24 @@
             </ul>
         </div>
     </main>
+{% endblock %}
+{% block script %}
+     <script>
+        let nav = document.getElementsByClassName('category-item');
+        let index = {{ index }}-1;
+        nav[index].id = "check";
+        for (let i = 0; i < nav.length; i++) {
+            nav[i].onclick = function () {
+                nav[index].id = "";
+                index = i;
+                nav[index].id = "check";
+            };
+        }
+        {#for (let i = 0; i < nav.length; i++) {#}
+        {#    nav[i].onmouseenter = function () {#}
+        {#        nav[index].style.backgroundColor = "rgb(100, 149, 237)";#}
+        {#        index = i;#}
+        {#        nav[index].style.backgroundColor = "rgb(204, 0, 0)";#}
+        {#    };#}
+    </script>
 {% endblock %}
