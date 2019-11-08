@@ -103,7 +103,7 @@ class NewsDetailView(View):
             news.save(update_fields=['clicks'])
             # 计算作者的文章数量
             news_count = models.News.objects.filter(author_id=news.author.id).count()
-            all_news = models.News.objects.filter(author_id=news.author.id)
+            all_news = models.News.objects.filter(author_id=news.author.id, is_delete=False)
             # 获取总评论数，总浏览量
             total_comment, total_clicks = self.get_count(all_news)
             # 获取作者最新的五篇文章，若不足五篇则返回所有
@@ -132,7 +132,7 @@ class NewsDetailView(View):
         # 计算所有文章的评论之和
         total_comment = 0
         total_clicks = 0
-        count_list = all_news.filter(is_delete=False).values('clicks').annotate(comments_count=Count('comments'))
+        count_list = all_news.values('clicks').annotate(comments_count=Count('comments'))
         for item in count_list:
             total_comment += item.get('comments_count')
             total_clicks += item.get('clicks')

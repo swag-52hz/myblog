@@ -6,12 +6,14 @@ from urllib.parse import urlencode
 import qiniu
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Count
+from django.contrib.auth.models import Group, Permission
 from django.http import JsonResponse, Http404
 from django.shortcuts import render
 from django.views import View
 
 from myblog import settings
 from news import models
+from users.models import User
 from course.models import Course, CourseCategory, Teacher
 from doc.models import Docs
 from utils.qiniu_secrets import qiniu_secrets_info
@@ -553,6 +555,7 @@ class CoursePubView(View):
     def post(self, request):
         pass
 
+
 class UploadVideo(View):
     def post(self, request):
         video_file = request.FILES.get('video_file', '')
@@ -564,3 +567,100 @@ class UploadVideo(View):
             return to_json_data(data={'video_url': res})
         else:
             return to_json_data(errno=Code.PARAMERR, errmsg='视频上传失败')
+
+
+class GroupManageView(View):
+    def get(self, request):
+        groups = Group.objects.values('id', 'name').annotate(num_users=Count('user')).order_by('-num_users')
+        return render(request, 'admin/user/groups_manage.html', locals())
+
+
+class GroupEditView(View):
+    def get(self, request, group_id):
+        group = Group.objects.filter(id=group_id).first()
+        if not group:
+            return to_json_data(errno=Code.PARAMERR, errmsg='要编辑的组不存在！')
+        permissions = Permission.objects.all()
+        return render(request, 'admin/user/groups_add.html', locals())
+
+    def delete(self, request, group_id):
+        group = Group.objects.filter(id=group_id).first()
+        if not group:
+            return to_json_data(errno=Code.NODATA, errmsg='要删除的组不存在！')
+        group.permissions.clear()
+        group.delete()
+        return to_json_data(errmsg='组删除成功！')
+
+    def put(self, request, group_id):
+        group = Group.objects.filter(id=group_id).first()
+        if not group:
+            return to_json_data(errno=Code.NODATA, errmsg='要更新的组不存在！')
+        json_data = request.body
+        if not json_data:
+            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+        dict_data = json.loads(json_data.decode('utf8'))
+        group_name = dict_data.get('name', '').strip()
+        if not group_name:
+            return to_json_data(errno=Code.PARAMERR, errmsg='组名不能为空！')
+        if group_name != group.name and Group.objects.filter(name=group_name).exists():
+            return to_json_data(errno=Code.DATAEXIST, errmsg='此组名已存在！')
+        permissions = dict_data.get('group_permissions', '')
+        if not permissions:
+            return to_json_data(errno=Code.NODATA, errmsg='未给用户组选择权限！')
+        try:
+            permissions_set = set(int(i) for i in permissions)
+        except Exception as e:
+            logger.info('权限参数错误：{}'.format(e))
+            return to_json_data(errno=Code.PARAMERR, errmsg='权限参数错误！')
+        real_set = set(j.id for j in Permission.objects.only('id'))
+        if not permissions_set.issubset(real_set):
+            return to_json_data(errno=Code.PARAMERR, errmsg='有不存在的权限参数！')
+        exists_perm_set = set(perm.id for perm in group.permissions.all())
+        if group.name == group_name and permissions_set == exists_perm_set:
+            return to_json_data(errno=Code.DATAEXIST, errmsg='用户组信息未修改！')
+        for perm_id in permissions_set:
+            p = Permission.objects.get(id=perm_id)
+            group.permissions.add(p)
+        group.name = group_name
+        group.save()
+        return to_json_data(errmsg='用户组更新成功！')
+
+
+class GroupAddView(View):
+    def get(self, request):
+        permissions = Permission.objects.all()
+        return render(request, 'admin/user/groups_add.html', locals())
+
+    def post(self, request):
+        json_data = request.body
+        if not json_data:
+            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+        dict_data = json.loads(json_data.decode('utf8'))
+        group_name = dict_data.get('name', '').strip()
+        if not group_name:
+            return to_json_data(errno=Code.PARAMERR, errmsg='组名不能为空！')
+        if Group.objects.filter(name=group_name).exists():
+            return to_json_data(errno=Code.DATAEXIST, errmsg='此组名已存在！')
+        permissions = dict_data.get('group_permissions', '')
+        if not permissions:
+            return to_json_data(errno=Code.NODATA, errmsg='未给用户组选择权限！')
+        try:
+            permissions_set = set(int(i) for i in permissions)
+        except Exception as e:
+            logger.info('权限参数错误：{}'.format(e))
+            return to_json_data(errno=Code.PARAMERR, errmsg='权限参数错误！')
+        real_set = set(j.id for j in Permission.objects.only('id'))
+        if not permissions_set.issubset(real_set):
+            return to_json_data(errno=Code.PARAMERR, errmsg='有不存在的权限参数！')
+        group = Group.objects.create(name=group_name)
+        for perm_id in permissions_set:
+            p = Permission.objects.get(id=perm_id)
+            group.permissions.add(p)
+        group.save()
+        return to_json_data(errmsg='用户组添加成功！')
+
+
+class UserManageView(View):
+    def get(self, request):
+        users = User.objects.all()
+        return render(request, 'admin/user/users_manage.html', locals())
