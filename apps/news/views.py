@@ -2,6 +2,7 @@ import logging
 import json
 
 import pytz
+from django.db.models import Count
 from django.shortcuts import render
 from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -9,6 +10,7 @@ from django.views import View
 from numba import jit
 
 from myblog import settings
+from news.models import Tag
 from utils.json_fun import to_json_data
 from utils.res_code import Code, error_map
 from haystack.views import SearchView as _SearchView
@@ -108,11 +110,9 @@ class NewsDetailView(View):
             latest_news = models.News.objects.only('id', 'title').\
                 filter(author_id=news.author.id, is_delete=False).order_by('-update_time')
             latest_news = latest_news[:5] if latest_news.count() > 5 else latest_news
-            tags = models.Tag.objects.filter(news__author=news.author, is_delete=False)
-            tags = list(set(tags))
-            tags = tags[:5] if len(tags) > 5 else tags
-            data_list = [(tag, models.News.objects.select_related('tag').filter(is_delete=False, tag=tag, author=news.author).count()) for tag in tags]
-            data_dict = dict(data_list)
+            tags = Tag.objects.filter(is_delete=False, news__author=news.author).values('id', 'name').\
+                annotate(news_count = Count('news')).order_by('-news_count')
+            data_dict = tags[:5] if tags.count() > 5 else tags
             hot_news = models.News.objects.only('id', 'title', 'clicks').\
                 filter(author=news.author, is_delete=False).order_by('-clicks')
             hot_news = hot_news[:5] if hot_news.count() > 5 else hot_news
@@ -131,17 +131,14 @@ class NewsDetailView(View):
     def get_count(self, all_news):
         # 计算所有文章的评论之和
         total_comment = 0
-        for new in all_news:
-            total_comment += models.Comments.objects.filter(news_id=new.id).count()
-        # 计算所有文章的点击量
         total_clicks = 0
-        for new in all_news:
-            total_clicks += int(new.clicks)
-            if total_clicks > 400000:
-                total_clicks = '40万+'
-                break
+        count_list = all_news.filter(is_delete=False).values('clicks').annotate(comments_count=Count('comments'))
+        for item in count_list:
+            total_comment += item.get('comments_count')
+            total_clicks += item.get('clicks')
+        if total_clicks > 400000:
+            total_clicks = '40万+'
         return (total_comment, total_clicks)
-
 
 
 class AddCommentsView(View):

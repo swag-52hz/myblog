@@ -69,6 +69,7 @@
 }
 .main-box .personal-box .img-box input{
     position: absolute;
+    cursor: pointer;
     top:121px;
     left: 0;
     opacity: 0;

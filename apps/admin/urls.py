@@ -22,5 +22,9 @@ urlpatterns = [
     path('docs/', views.DocManageView.as_view(), name='doc'),
     path('docs/<int:doc_id>/', views.DocEditView.as_view(), name='docs_edit'),
     path('docs/pub/', views.DocPubView.as_view(), name='doc_pub'),
-    path('docs/files/', views.DocUploadFiles.as_view(), name='upload_files')
+    path('docs/files/', views.DocUploadFiles.as_view(), name='upload_files'),
+    path('courses/', views.CourseManageView.as_view(), name='courses'),
+    path('courses/<int:course_id>/', views.CourseEditView.as_view(), name='course_edit'),
+    path('courses/pub/', views.CoursePubView.as_view(), name='courses_pub'),
+    path('courses/video/', views.UploadVideo.as_view(), name='upload_video'),
 ]

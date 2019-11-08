@@ -125,12 +125,12 @@
         <div class="category-box d-flex">
             <h3 class="aside-title">分类专栏</h3>
             <ul class="category-list clearfix">
-                {% for tag, count in data_dict.items %}
+                {% for tag in data_dict %}
                 <li>
                     <a href="#">
                         <img src="/media/tag.png" alt="">
                         <span>{{ tag.name }}</span>
-                        <span class="count">{{ count }}</span>
+                        <span class="count">{{ tag.news_count }}</span>
                     </a>
                 </li>
                 {% endfor %}

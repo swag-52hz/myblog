@@ -12,6 +12,7 @@ from django.views import View
 
 from myblog import settings
 from news import models
+from course.models import Course, CourseCategory, Teacher
 from doc.models import Docs
 from utils.qiniu_secrets import qiniu_secrets_info
 from . import constants
@@ -19,6 +20,7 @@ from . import forms
 # Create your views here.
 from utils.json_fun import to_json_data
 from utils.res_code import Code, error_map
+from utils.vod_test import get_video_url
 from utils import paginator_script
 from utils.fastdfs.client import FDFS_Client
 
@@ -515,3 +517,50 @@ class DocPubView(View):
                 err_msg_list.append(item[0].get('message'))
             err_msg_str = '/'.join(err_msg_list)
             return to_json_data(errno=Code.DATAERR, errmsg=err_msg_str)
+
+
+class CourseManageView(View):
+    def get(self, request):
+        courses = Course.objects.select_related('teacher', 'category').\
+            only('id', 'name', 'teacher__name', 'category__name').filter(is_delete=False)
+        return render(request, 'admin/course/courses_manage.html', locals())
+
+
+class CourseEditView(View):
+    def delete(self, request, course_id):
+        course = Course.objects.only('id').filter(id=course_id, is_delete=False).first()
+        if not course:
+            return to_json_data(errno=Code.NODATA, errmsg='需要删除的视频不存在！')
+        course.is_delete = True
+        course.save(update_fields=['is_delete', 'update_time'])
+        return to_json_data(errmsg='视频删除成功！')
+
+    def get(self, request, course_id):
+        course = Course.objects.only('id').filter(id=course_id, is_delete=False).first()
+        if not course:
+            return to_json_data(errno=Code.NODATA, errmsg='需要编辑的视频不存在！')
+        categories = CourseCategory.objects.filter(is_delete=False)
+        teachers = Teacher.objects.filter(is_delete=False)
+        return render(request, 'admin/course/courses_pub.html', locals())
+
+
+class CoursePubView(View):
+    def get(self, request):
+        categories = CourseCategory.objects.filter(is_delete=False)
+        teachers = Teacher.objects.filter(is_delete=False)
+        return render(request, 'admin/course/courses_pub.html', locals())
+
+    def post(self, request):
+        pass
+
+class UploadVideo(View):
+    def post(self, request):
+        video_file = request.FILES.get('video_file', '')
+        if video_file.content_type != 'video/mp4':
+           return to_json_data(errno=Code.PARAMERR, errmsg='视频类型错误！')
+        video_name = video_file.name
+        res = get_video_url(video_name)
+        if res:
+            return to_json_data(data={'video_url': res})
+        else:
+            return to_json_data(errno=Code.PARAMERR, errmsg='视频上传失败')
