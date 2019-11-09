@@ -23,6 +23,7 @@
             <thead>
             <tr>
               <th>用户名</th>
+              <th>是否激活?</th>
               <th>是否能登录后台？</th>
               <th>是否是超级管理员？</th>
               <th>所属组</th>
@@ -33,6 +34,11 @@
             {% for one_user in users %}
               <tr data-id="{{ one_user.id }}" data-name="{{ one_user.username }}">
                 <td>{{ one_user.username }}</td>
+                {% if one_user.is_active %}
+                    <td>是</td>
+                {% else %}
+                    <td>否</td>
+                {% endif %}
                 {% if one_user.is_staff %}
                   <td>是</td>
                 {% else %}
@@ -48,7 +54,7 @@
                 <td>{{ one_user.get_groups_name }}</td>
 
                 <td>
-                  <a href="#" class="btn btn-xs btn-warning btn-edit">编辑</a>
+                  <a href="{% url 'admin:users_edit' one_user.id %}" class="btn btn-xs btn-warning btn-edit">编辑</a>
                   <button class="btn btn-xs btn-danger btn-del">删除</button>
                 </td>
               </tr>

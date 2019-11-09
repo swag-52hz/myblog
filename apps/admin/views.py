@@ -29,8 +29,9 @@ from utils.fastdfs.client import FDFS_Client
 
 logger = logging.getLogger('django')
 
-def index(request):
-    return render(request, 'admin/index/index.html')
+class IndexView(View):
+    def get(self, request):
+        return render(request, 'admin/index/index.html')
 
 
 class TagsManageView(View):
@@ -618,6 +619,8 @@ class GroupEditView(View):
         exists_perm_set = set(perm.id for perm in group.permissions.all())
         if group.name == group_name and permissions_set == exists_perm_set:
             return to_json_data(errno=Code.DATAEXIST, errmsg='用户组信息未修改！')
+        # 先清空之前的权限，再添加选择的权限
+        group.permissions.clear()
         for perm_id in permissions_set:
             p = Permission.objects.get(id=perm_id)
             group.permissions.add(p)
@@ -662,5 +665,64 @@ class GroupAddView(View):
 
 class UserManageView(View):
     def get(self, request):
-        users = User.objects.all()
+        users = User.objects.only('is_active', 'is_staff', 'is_superuser').all()
         return render(request, 'admin/user/users_manage.html', locals())
+
+
+class UserEditView(View):
+    def get(self, request, user_id):
+        user_instance = User.objects.filter(id=user_id).first()
+        if not user_instance:
+            return to_json_data(errno=Code.NODATA, errmsg='要编辑的用户不存在！')
+        groups = Group.objects.only('name').all()
+        return render(request, 'admin/user/users_edit.html', locals())
+
+    def delete(self, request, user_id):
+        user_instance = User.objects.filter(id=user_id).first()
+        if not user_instance:
+            return to_json_data(errno=Code.PARAMERR, errmsg='要删除的用户不存在！')
+        user_instance.groups.clear()
+        user_instance.user_permissions.clear()
+        user_instance.is_active = False
+        user_instance.save()
+        return to_json_data(errmsg='用户删除成功！')
+
+    def put(self, request, user_id):
+        user_instance = User.objects.filter(id=user_id).first()
+        if not user_instance:
+            return to_json_data(errno=Code.NODATA, errmsg='要更新的用户不存在！')
+        json_data = request.body
+        if not json_data:
+            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+        dict_data = json.loads(json_data.decode('utf8'))
+        try:
+            is_staff = int(dict_data.get('is_staff'))
+            is_active = int(dict_data.get('is_active'))
+            is_superuser = int(dict_data.get('is_superuser'))
+            data_list = [is_staff, is_active, is_superuser]
+            # 判断数据是否为0或1
+            if False in [data in (0, 1) for data in data_list]:
+                return to_json_data(errno=Code.DATAERR, errmsg='参数错误！！！')
+        except Exception as e:
+            logger.info('从前端获取参数错误：{}'.format(e))
+            return to_json_data(errno=Code.PARAMERR, errmsg='从前端获取参数错误！')
+        groups = dict_data.get('groups', '')
+        if not groups:
+            return to_json_data(errno=Code.PARAMERR, errmsg='未选择组！')
+        try:
+            group_set = set(int(i) for i in groups)
+        except Exception as e:
+            logger.info('组参数错误：{}'.format(e))
+            return to_json_data(errno=Code.PARAMERR, errmsg='组参数错误！')
+        real_group_set = set(i.id for i in Group.objects.only('id').all())
+        if not group_set.issubset(real_group_set):
+            return to_json_data(errno=Code.PARAMERR, errmsg='有不存在的组参数！')
+        gs = Group.objects.filter(id__in=group_set)
+        user_instance.groups.clear()    # 先清空之前的组
+        # 多对多操作，set可一次添加多个
+        user_instance.groups.set(gs)
+        user_instance.is_active = bool(is_active)
+        user_instance.is_superuser = bool(is_superuser)
+        user_instance.is_staff = bool(is_staff)
+        user_instance.save()
+        return to_json_data(errmsg='用户信息更新成功！')

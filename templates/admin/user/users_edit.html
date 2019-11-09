@@ -13,12 +13,11 @@
   用户编辑
 {% endblock %}
 
-
-{% block content %}
-  <style>
+{% block link %}
+    <style>
     span {
       font-weight: 700;
-      margin-top: 30px;
+      {#margin-top: 30px;#}
     }
     .form-check-label {
       font-size: 14px;
@@ -26,6 +25,10 @@
       line-height: 1.428;
     }
   </style>
+{% endblock %}
+
+
+{% block content %}
 
   <div class="row">
     <div class="col-md-12 col-xs-12 col-sm-12">

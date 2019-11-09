@@ -24,3 +24,7 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    def get_groups_name(self):
+        group_name_list = [group.name for group in self.groups.all()]
+        return '|'.join(group_name_list)

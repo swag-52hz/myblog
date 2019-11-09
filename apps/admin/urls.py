@@ -4,7 +4,7 @@ from . import views
 
 app_name = 'admin'
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.IndexView.as_view(), name='index'),
     path('tags/', views.TagsManageView.as_view(), name='tags_manage'),
     path('tags/<int:tag_id>/', views.TagsEditView.as_view(), name='tags_edit'),
     path('hotnews/', views.HotNewsManageView.as_view(), name='hot_news'),
@@ -30,4 +30,6 @@ urlpatterns = [
     path('groups/', views.GroupManageView.as_view(), name='groups'),
     path('groups/<int:group_id>/', views.GroupEditView.as_view(), name='group_edit'),
     path('groups/add/', views.GroupAddView.as_view(), name='group_add'),
+    path('users/', views.UserManageView.as_view(), name='users'),
+    path('users/<int:user_id>/', views.UserEditView.as_view(), name='users_edit'),
 ]
