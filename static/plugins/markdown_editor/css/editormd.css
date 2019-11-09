@@ -247,6 +247,7 @@
 }
 
 .editormd-dialog {
+  height: 300px;
   color: #666;
   position: fixed;
   z-index: 99999;
@@ -531,7 +532,7 @@
 .editormd-form {
   color: #666;
 }
-.editormd-form label {
+.editormd-dialog-container .editormd-form label {
   float: left;
   display: block;
   width: 75px;

@@ -82,7 +82,7 @@
         .content-wrapper, .main-footer{
             margin-left: 0;
         }
-        .box .box-body .form-group label{
+        .form-group label{
             font-size: 15px;
             font-weight: bolder;
             margin-bottom: 10px;
@@ -209,7 +209,7 @@
                     sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
                     imageUpload: true,
                     imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
-                    {#imageUploadURL: "{% url 'admin:markdown_image_upload' %}",#}
+                    imageUploadURL: "{% url 'admin:markdown_image_upload' %}",
                     {#          onload: function () {#}
                     {#            console.log('onload', this);#}
                     {##}

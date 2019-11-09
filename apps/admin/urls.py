@@ -16,6 +16,7 @@ urlpatterns = [
     path('news/pub/', views.NewsPubView.as_view(), name='news_pub'),
     path('news/images/', views.NewsUploadImage.as_view(), name='upload_images'),
     path('token/', views.UploadToken.as_view(), name='token'),
+    path('markdown/images/', views.MarkDownUploadImage.as_view(), name='markdown_image_upload'),
     path('banners/', views.BannerManageView.as_view(), name='banners'),
     path('banners/<int:banner_id>/', views.BannerEditView.as_view(), name='banners_edit'),
     path('banners/add/', views.BannerAddView.as_view(), name='banner_add'),

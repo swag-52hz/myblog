@@ -6,7 +6,10 @@ from urllib.parse import urlencode
 import qiniu
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Count
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import JsonResponse, Http404
 from django.shortcuts import render
 from django.views import View
@@ -29,8 +32,11 @@ from utils.fastdfs.client import FDFS_Client
 
 logger = logging.getLogger('django')
 
-class IndexView(View):
+class IndexView(LoginRequiredMixin, View):
+    redirect_field_name = 'next'
     def get(self, request):
+        if not request.user.is_staff:
+            return render(request, '403.html')
         return render(request, 'admin/index/index.html')
 
 
@@ -59,8 +65,13 @@ class TagsManageView(View):
             return to_json_data(errno=Code.PARAMERR, errmsg='标签名不能为空！')
 
 
-class TagsEditView(View):
+class TagsEditView(PermissionRequiredMixin, View):
     """负责标签删除以及编辑功能的类视图"""
+    permission_required = ('news.change_tag', 'news.delete_tag')
+
+    def handle_no_permission(self):
+        return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限！')
+
     def delete(self, request, tag_id):
         tag = models.Tag.objects.filter(id=tag_id).first()
         if tag:
@@ -91,8 +102,11 @@ class TagsEditView(View):
             return to_json_data(errno=Code.PARAMERR, errmsg='标签名不能为空！')
 
 
-class HotNewsManageView(View):
+class HotNewsManageView(PermissionRequiredMixin, View):
     """热门文章管理视图"""
+    permission_required = ('news.view_hotnews')
+    raise_exception = True
+
     def get(self, request):
         hot_news = models.HotNews.objects.select_related('news__tag').\
             only('priority', 'news__title', 'news_id', 'news__tag__name').\
@@ -100,8 +114,14 @@ class HotNewsManageView(View):
         return render(request, 'admin/news/news_hot.html', locals())
 
 
-class HotNewsEditView(View):
+class HotNewsEditView(PermissionRequiredMixin, View):
     """负责热门文章的删除以及编辑功能类视图"""
+    permission_required = ('news.delete_hotnews', 'news.change_hotnews')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限')
+
     def delete(self, request, hotnews_id):
         hot_new = models.HotNews.objects.only('id').filter(id=hotnews_id).first()
         if hot_new:
@@ -133,7 +153,16 @@ class HotNewsEditView(View):
         return to_json_data(errmsg='热门文章更新成功！')
 
 
-class HotNewsAddView(View):
+class HotNewsAddView(PermissionRequiredMixin, View):
+    permission_required = ('news.add_hotnews', 'news.view_hotnews')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        if self.request.method != 'GET':
+            return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限')
+        else:
+            return super(HotNewsAddView, self).handle_no_permission()
+
     def get(self, request):
         tags = models.Tag.objects.only('name').filter(is_delete=False)
         priority_dict = dict(models.HotNews.CHOICES)
@@ -174,11 +203,14 @@ class NewsByTagIdView(View):
         return to_json_data(data={'news': news_list})
 
 
-class NewsManageView(View):
+class NewsManageView(PermissionRequiredMixin, View):
+    permission_required = ('news.view_news')
+    raise_exception = True
+
     def get(self, request):
         tags = models.Tag.objects.only('id', 'name').filter(is_delete=False)
         newes = models.News.objects.select_related('author', 'tag').\
-            only('title', 'author__username', 'tag__name', 'update_time').filter(is_delete=False)
+            only('title', 'author__username', 'tag__name', 'update_time').filter(is_delete=False).order_by('-update_time')
         try:
             tag_id = int(request.GET.get('tag_id', 0))
         except Exception as e:
@@ -239,7 +271,16 @@ class NewsManageView(View):
         return render(request, 'admin/news/news_manage.html', context=context)
 
 
-class NewsEditView(View):
+class NewsEditView(PermissionRequiredMixin, View):
+    permission_required = ('news.change_news', 'news.delete_news')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        if self.request.method != 'GET':
+            return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限！')
+        else:
+            return super(NewsEditView, self).handle_no_permission()
+
     def delete(self, request, news_id):
         news = models.News.objects.only('id').filter(id=news_id).first()
         if news:
@@ -341,14 +382,54 @@ class UploadToken(View):
         return JsonResponse({'uptoken': token})
 
 
-class BannerManageView(View):
+@method_decorator(csrf_exempt, name='dispatch')
+class MarkDownUploadImage(View):
+    """markdown上传图片"""
+    @csrf_exempt
+    def post(self, request):
+        image_file = request.FILES.get('editormd-image-file')
+        if not image_file:
+            logger.info('从前端获取图片失败')
+            return JsonResponse({'success': 0, 'message': '从前端获取图片失败'})
+        if image_file.content_type not in ('image/jpeg', 'image/png', 'image/gif', 'image/jpg'):
+            return JsonResponse({'success': 0, 'message': '不能上传非图片文件'})
+        try:
+            image_ext_name = image_file.name.split('.')[-1]
+        except Exception as e:
+            logger.info('图片拓展名异常：{}'.format(e))
+            image_ext_name = 'jpg'
+        try:
+            upload_res = FDFS_Client.upload_by_buffer(image_file.read(), file_ext_name=image_ext_name)
+        except Exception as e:
+            logger.error('图片上传出现异常：{}'.format(e))
+            return JsonResponse({'success': 0, 'message': '图片上传异常'})
+        else:
+            if upload_res.get('Status') != 'Upload successed.':
+                logger.info('图片上传到FastDFS服务器失败')
+                return JsonResponse({'success': 0, 'message': '图片上传到服务器失败'})
+            else:
+                image_name = upload_res.get('Remote file_id')
+                image_url = settings.FASTDFS_SERVER_DOMAIN + image_name
+                return JsonResponse({'success': 1, 'message': '图片上传成功', 'url': image_url})
+
+
+class BannerManageView(PermissionRequiredMixin, View):
+    permission_required = ('news.view_banner')
+    raise_exception = True
+
     def get(self, request):
         banners = models.Banner.objects.only('id', 'priority', 'image_url').filter(is_delete=False)
         priority_dict = dict(models.Banner.CHOICES)
         return render(request, 'admin/news/news_banner.html', locals())
 
 
-class BannerEditView(View):
+class BannerEditView(PermissionRequiredMixin, View):
+    permission_required = ('news.delete_banner', 'news.change_banner')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限！')
+
     def delete(self, request, banner_id):
         banner = models.Banner.objects.only('id').filter(id=banner_id).first()
         if banner:
@@ -386,7 +467,16 @@ class BannerEditView(View):
         return to_json_data(errmsg='轮播图更新成功！')
 
 
-class BannerAddView(View):
+class BannerAddView(PermissionRequiredMixin, View):
+    permission_required = ('news.add_banner')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        if self.request.method != 'GET':
+            return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限')
+        else:
+            return super(BannerAddView, self).handle_no_permission()
+
     def get(self, request):
         tags = models.Tag.objects.only('id', 'name').filter(is_delete=False)
         priority_dict = dict(models.Banner.CHOICES)
@@ -431,13 +521,25 @@ class BannerAddView(View):
         return to_json_data(errmsg='轮播图添加成功！')
 
 
-class DocManageView(View):
+class DocManageView(PermissionRequiredMixin, View):
+    permission_required = ('doc.view_docs')
+    raise_exception = True
+
     def get(self, request):
         docs = Docs.objects.only('id', 'title', 'update_time').filter(is_delete=False)
         return render(request, 'admin/doc/docs_manage.html', locals())
 
 
-class DocEditView(View):
+class DocEditView(PermissionRequiredMixin, View):
+    permission_required = ('doc.view_docs', 'doc.delete_docs', 'doc.change_docs')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        if self.request.method != 'GET':
+            return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限')
+        else:
+            return super(DocEditView, self).handle_no_permission()
+
     def get(self, request, doc_id):
         doc = Docs.objects.filter(id=doc_id, is_delete=False).first()
         if not doc:
@@ -474,7 +576,13 @@ class DocEditView(View):
             return to_json_data(errno=Code.DATAERR, errmsg=err_msg_str)
 
 
-class DocUploadFiles(View):
+class DocUploadFiles(PermissionRequiredMixin, View):
+    permission_required = ('doc.add_docs')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限')
+
     def post(self, request):
         text_file = request.FILES.get('text_file')
         if not text_file:
@@ -499,7 +607,17 @@ class DocUploadFiles(View):
             logger.info('文档上传到FastDFS服务器失败')
             return to_json_data(errno=Code.UNKOWNERR, errmsg='上传文档到服务器失败！')
 
-class DocPubView(View):
+
+class DocPubView(PermissionRequiredMixin, View):
+    permission_required = ('doc.view_docs', 'doc.add_docs')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        if self.request.method != 'GET':
+            return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限')
+        else:
+            return super(DocPubView, self).handle_no_permission()
+
     def get(self, request):
         return render(request, 'admin/doc/docs_pub.html')
 
@@ -522,14 +640,26 @@ class DocPubView(View):
             return to_json_data(errno=Code.DATAERR, errmsg=err_msg_str)
 
 
-class CourseManageView(View):
+class CourseManageView(PermissionRequiredMixin, View):
+    permission_required = ('course.view_course')
+    raise_exception = True
+
     def get(self, request):
         courses = Course.objects.select_related('teacher', 'category').\
             only('id', 'name', 'teacher__name', 'category__name').filter(is_delete=False)
         return render(request, 'admin/course/courses_manage.html', locals())
 
 
-class CourseEditView(View):
+class CourseEditView(PermissionRequiredMixin, View):
+    permission_required = ('course.view_course', 'course.delete_course', 'course.change_course')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        if self.request.method != 'GET':
+            return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限')
+        else:
+            return super(CourseEditView, self).handle_no_permission()
+
     def delete(self, request, course_id):
         course = Course.objects.only('id').filter(id=course_id, is_delete=False).first()
         if not course:
@@ -547,7 +677,16 @@ class CourseEditView(View):
         return render(request, 'admin/course/courses_pub.html', locals())
 
 
-class CoursePubView(View):
+class CoursePubView(PermissionRequiredMixin, View):
+    permission_required = ('course.view_course', 'course.add_course')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        if self.request.method != 'GET':
+            return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限')
+        else:
+            return super(CoursePubView, self).handle_no_permission()
+
     def get(self, request):
         categories = CourseCategory.objects.filter(is_delete=False)
         teachers = Teacher.objects.filter(is_delete=False)
@@ -557,7 +696,13 @@ class CoursePubView(View):
         pass
 
 
-class UploadVideo(View):
+class UploadVideo(PermissionRequiredMixin, View):
+    permission_required = 'course.add_course'
+    raise_exception = True
+
+    def handle_no_permission(self):
+        return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限')
+
     def post(self, request):
         video_file = request.FILES.get('video_file', '')
         if video_file.content_type != 'video/mp4':
@@ -570,13 +715,25 @@ class UploadVideo(View):
             return to_json_data(errno=Code.PARAMERR, errmsg='视频上传失败')
 
 
-class GroupManageView(View):
+class GroupManageView(PermissionRequiredMixin, View):
+    permission_required = ('auth.view_group')
+    raise_exception = True
+
     def get(self, request):
         groups = Group.objects.values('id', 'name').annotate(num_users=Count('user')).order_by('-num_users')
         return render(request, 'admin/user/groups_manage.html', locals())
 
 
-class GroupEditView(View):
+class GroupEditView(PermissionRequiredMixin, View):
+    permission_required = ('auth.delete_group', 'auth.change_group')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        if self.request.method != 'GET':
+            return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限')
+        else:
+            return super(GroupEditView, self).handle_no_permission()
+
     def get(self, request, group_id):
         group = Group.objects.filter(id=group_id).first()
         if not group:
@@ -629,7 +786,16 @@ class GroupEditView(View):
         return to_json_data(errmsg='用户组更新成功！')
 
 
-class GroupAddView(View):
+class GroupAddView(PermissionRequiredMixin, View):
+    permission_required = ('auth.add_group')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        if self.request.method != 'GET':
+            return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限')
+        else:
+            return super(GroupAddView, self).handle_no_permission()
+
     def get(self, request):
         permissions = Permission.objects.all()
         return render(request, 'admin/user/groups_add.html', locals())
@@ -663,13 +829,25 @@ class GroupAddView(View):
         return to_json_data(errmsg='用户组添加成功！')
 
 
-class UserManageView(View):
+class UserManageView(PermissionRequiredMixin, View):
+    permission_required = ('users.view_user')
+    raise_exception = True
+
     def get(self, request):
         users = User.objects.only('is_active', 'is_staff', 'is_superuser').all()
         return render(request, 'admin/user/users_manage.html', locals())
 
 
-class UserEditView(View):
+class UserEditView(PermissionRequiredMixin, View):
+    permission_required = ('user.change_user', 'user.delete_user')
+    raise_exception = True
+
+    def handle_no_permission(self):
+        if self.request.method != 'GET':
+            return to_json_data(errno=Code.ROLEERR, errmsg='没有操作权限')
+        else:
+            return super(UserEditView, self).handle_no_permission()
+
     def get(self, request, user_id):
         user_instance = User.objects.filter(id=user_id).first()
         if not user_instance:
