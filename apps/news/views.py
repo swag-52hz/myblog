@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views import View
-from numba import jit
+from django.db.models import Count, Sum
 
 from myblog import settings
 from news.models import Tag
@@ -105,7 +105,10 @@ class NewsDetailView(View):
             news_count = models.News.objects.filter(author_id=news.author.id).count()
             all_news = models.News.objects.filter(author_id=news.author.id, is_delete=False)
             # 获取总评论数，总浏览量
-            total_comment, total_clicks = self.get_count(all_news)
+            total_clicks = models.News.objects.filter(author_id=news.author.id).aggregate(clicks=Sum('clicks')).get('clicks')
+            if total_clicks > 400000:
+                total_clicks = '40万+'
+            total_comment = models.News.objects.filter(author_id=news.author.id).aggregate(comments=Count('comments')).get('comments')
             # 获取作者最新的五篇文章，若不足五篇则返回所有
             latest_news = models.News.objects.only('id', 'title').\
                 filter(author_id=news.author.id, is_delete=False).order_by('-update_time')
@@ -126,19 +129,6 @@ class NewsDetailView(View):
             return render(request, 'news/news_detail.html', locals())
         else:
             return Http404('id为{}的文章不存在！！！'.format(news_id))
-
-    @jit
-    def get_count(self, all_news):
-        # 计算所有文章的评论之和
-        total_comment = 0
-        total_clicks = 0
-        count_list = all_news.values('clicks').annotate(comments_count=Count('comments'))
-        for item in count_list:
-            total_comment += item.get('comments_count')
-            total_clicks += item.get('clicks')
-        if total_clicks > 400000:
-            total_clicks = '40万+'
-        return (total_comment, total_clicks)
 
 
 class AddCommentsView(View):
