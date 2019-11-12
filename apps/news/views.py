@@ -192,3 +192,35 @@ class SearchView(_SearchView):
             show_all = False
             qs = super(SearchView, self).create_response()
             return qs
+
+
+class CategoryView(View):
+    def get(self, request, tag_id):
+        tag = Tag.objects.filter(id=tag_id, is_delete=False).first()
+        if not tag:
+            return render(request, 'base/404notfound.html')
+        newes = models.News.objects.only('title', 'digest', 'update_time', 'clicks')\
+            .filter(tag_id=tag.id, is_delete=False).annotate(comment_count=Count('comments'))[:10]
+        author = tag.news_set.first().author
+        # 该标签下的文章数量
+        tag_data = Tag.objects.filter(id=tag_id).annotate(Count('news'), Sum('news__clicks'))[0]
+        # 计算作者的文章数量
+        news_count = models.News.objects.filter(author_id=author.id, is_delete=False).count()
+        # 获取总评论数，总浏览量
+        total_clicks = models.News.objects.filter(author_id=author.id, is_delete=False).aggregate(clicks=Sum('clicks')).get(
+            'clicks')
+        if total_clicks > 400000:
+            total_clicks = '40万+'
+        total_comment = models.News.objects.filter(author_id=author.id).aggregate(comments=Count('comments')).get(
+            'comments')
+        # 获取作者最新的五篇文章，若不足五篇则返回所有
+        latest_news = models.News.objects.only('id', 'title'). \
+            filter(author_id=author.id, is_delete=False).order_by('-update_time')
+        latest_news = latest_news[:5] if latest_news.count() > 5 else latest_news
+        tags = Tag.objects.filter(is_delete=False, news__author=author).values('id', 'name'). \
+            annotate(news_count=Count('news')).order_by('-news_count')
+        data_dict = tags[:5] if tags.count() > 5 else tags
+        hot_news = models.News.objects.only('id', 'title', 'clicks'). \
+            filter(author=author, is_delete=False).order_by('-clicks')
+        hot_news = hot_news[:5] if hot_news.count() > 5 else hot_news
+        return render(request, 'users/category.html', locals())

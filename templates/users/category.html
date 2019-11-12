@@ -1,84 +1,51 @@
 {% extends 'base/base.html' %}
 {% block title %}
-    文章详情页
+    分类专栏
 {% endblock %}
 {% block link %}
-    <link rel="stylesheet" href="{% static 'css/news/news-detail.css' %}">
+    <link rel="stylesheet" href="{% static 'css/news/category.css' %}">
 {% endblock %}
 {% block main-contain %}
-    <div class="news-contain">
-      <h1 class="news-title">{{ news.title }}</h1>
-      <div class="news-info">
-        <div class="news-info-left">
-          <span class="news-pub-time">{{ news.update_time }}</span>
-            <span class="news-author"><a href="#">{{ news.author.username }}</a></span>
-            <span class="news-pub-time">浏览量：{{ news.clicks }}</span>
-          <span class="news-type">{{ news.tag.name }}</span>
+    <div class="column">
+        <div class="info-box">
+            <div class="category-img">
+                <img src="/media/tag.png" alt="">
+            </div>
+            <div class="category-title">
+                <h3>{{ tag.name }}</h3>
+                <a href="{% url 'users:blog' %}">管理文章</a>
+            </div>
+            <div class="category-info">
+                <p><span>关注数：0</span><span>文章数：{{ tag_data.news__count }}</span><span>访问量：{{ tag_data.news__clicks__sum }}</span></p>
+            </div>
         </div>
-      </div>
-      <article class="news-content">
-        {{ news.content|safe }}
-      </article>
-      <div class="comment-contain">
-        <div class="comment-pub clearfix">
-          <div class="new-comment">
-            文章评论(<span class="comment-count">{{ comment_count }}</span>)
-          </div>
-            {% if user.is_authenticated %}
-                <div class="comment-control logged-comment" news-id="{{ news.id }}">
-                    <input type="text" placeholder="请填写评论">
-                    <button class="comment-btn">发表评论</button>
-                </div>
-            {% else %}
-                <div class="comment-control please-login-comment" news-id="{{ news.id }}">
-                    <input type="text" placeholder="请登录后参加评论" readonly>
-                    <button class="comment-btn">发表评论</button>
-                </div>
-            {% endif %}
-        </div>
-        <ul class="comment-list">
-            {% for one_comment in comments_list %}
-                <li class="comment-item">
-                    <div class="comment-info clearfix">
-                        <img src="{{ one_comment.avatar_url }}" alt="avatar" class="comment-avatar">
-                        <span class="comment-user">{{ one_comment.author }}</span>
+        <ul class="category-article-list">
+            {% for news in newes %}
+            <li>
+                <a href="{% url 'news:news_detail' news.id %}">
+                    <div class="category-title"><span>原创</span> <h3>{{ news.title }}</h3></div>
+                    <div class="category-desc">{{ news.digest }}</div>
+                    <div class="category-info">
+                        <p>
+                            <span>{{ news.update_time }}</span>
+                            <span>阅读数：{{ news.clicks }}</span>
+                            <span>评论数：{{ news.comment_count }}</span>
+                        </p>
                     </div>
-                    <div class="comment-content">{{ one_comment.content }}</div>
-
-                    {% if one_comment.parent %}
-                        <div class="parent_comment_text">
-                            <div class="parent_username">{{ one_comment.parent.author }}</div>
-                            <br/>
-                            <div class="parent_content_text">
-                                {{ one_comment.parent.content }}
-                            </div>
-                        </div>
-                    {% endif %}
-
-                    <div class="comment_time left_float">{{ one_comment.update_time }}</div>
-                    <a href="javascript:;" class="reply_a_tag right_float">回复</a>
-                    <form class="reply_form left_float" comment-id="{{ one_comment.content_id }}"
-                          news-id="{{ one_comment.news_id }}">
-                        <textarea class="reply_input"></textarea>
-                        <input type="button" value="回复" class="reply_btn right_float">
-                        <input type="reset" name="" value="取消" class="reply_cancel right_float">
-                    </form>
-
-                </li>
+                </a>
+            </li>
             {% endfor %}
         </ul>
-      </div>
-
     </div>
 {% endblock %}
 {% block side %}
     <div class="aside-box">
         <div class="head-box d-flex">
             <div class="avatar-box">
-                <a href="#"><img src="{{ news.author.avatar_url }}" alt=""></a>
+                <a href="#"><img src="{{ author.avatar_url }}" alt=""></a>
             </div>
             <div class="user-info">
-                <p><a href="#" class="user-name">{{ news.author.username }}</a></p>
+                <p><a href="#" class="user-name">{{ author.username }}</a></p>
                 <p>
                     <a href="#" class="home-page">Ta的个人主页 ></a>
                     <a href="#" class="personal-click common">私信</a>
@@ -149,8 +116,3 @@
         </div>
     </div>
 {% endblock %}
-{% block script %}
-    <script src="{% static 'js/news/news_detail.js' %}"></script>
-{% endblock %}
-
-

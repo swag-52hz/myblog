@@ -10,4 +10,5 @@ urlpatterns = [
     path('news/<int:news_id>/', views.NewsDetailView.as_view(), name='news_detail'),
     path('news/<int:news_id>/comments/', views.AddCommentsView.as_view(), name='news_comments'),
     path('search/', views.SearchView(), name='search'),
+    path('news/category/<int:tag_id>/', views.CategoryView.as_view(), name='category'),
 ]
