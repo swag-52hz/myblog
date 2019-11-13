@@ -20,22 +20,9 @@
             </div>
         </div>
         <ul class="category-article-list">
-            {% for news in newes %}
-            <li>
-                <a href="{% url 'news:news_detail' news.id %}">
-                    <div class="category-title"><span>原创</span> <h3>{{ news.title }}</h3></div>
-                    <div class="category-desc">{{ news.digest }}</div>
-                    <div class="category-info">
-                        <p>
-                            <span>{{ news.update_time }}</span>
-                            <span>阅读数：{{ news.clicks }}</span>
-                            <span>评论数：{{ news.comment_count }}</span>
-                        </p>
-                    </div>
-                </a>
-            </li>
-            {% endfor %}
+
         </ul>
+        <a href="javascript:void(0);" class="btn-more">滑动加载更多</a>
     </div>
 {% endblock %}
 {% block side %}
@@ -115,4 +102,7 @@
             </ul>
         </div>
     </div>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'js/users/category.js' %}"></script>
 {% endblock %}

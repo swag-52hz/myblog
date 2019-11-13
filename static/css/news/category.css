@@ -84,6 +84,19 @@
     margin-top: 3px;
     margin-right: 8px;
 }
+.column .btn-more {
+    display: block;
+    border: none;
+    width: 400px;
+    line-height: 40px;
+    text-align: center;
+    background: skyblue;
+    color: #efefef;
+    margin: 20px auto;
+}
+.column .btn-more:hover {
+    background: #54b9e2;
+}
 .aside-box{
     float: right;
     width: 350px;

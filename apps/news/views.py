@@ -42,8 +42,9 @@ class NewsListView(View):
             logger.info('获取页码出错：{}'.format(e))
             page = 1
         news_queryset = models.News.objects.select_related('tag', 'author')\
-            .only('title', 'digest', 'author__username', 'update_time', 'tag__name', 'image_url')
-        news = news_queryset.filter(is_delete=False, tag_id=tag_id) or news_queryset.filter(is_delete=False)
+            .only('title', 'digest', 'clicks', 'author__username', 'update_time', 'tag__name', 'image_url')
+        news = news_queryset.filter(is_delete=False, tag_id=tag_id).annotate(comment_count=Count('comments'))\
+               or news_queryset.filter(is_delete=False).annotate(comment_count=Count('comments'))
         paginator = Paginator(news, NEWS_PER_PAGE)
         try:
             news_info = paginator.page(page)
@@ -61,6 +62,8 @@ class NewsListView(View):
                     'id': item.id,
                     'title': item.title,
                     'digest': item.digest,
+                    'clicks': item.clicks,
+                    'comment_count': item.comment_count,
                     'author': item.author.username,
                     'tag_name': item.tag.name,
                     'update_time': local_time.strftime('%Y年%m月%d日 %H:%M'),
@@ -203,7 +206,7 @@ class CategoryView(View):
             .filter(tag_id=tag.id, is_delete=False).annotate(comment_count=Count('comments'))[:10]
         author = tag.news_set.first().author
         # 该标签下的文章数量
-        tag_data = Tag.objects.filter(id=tag_id).annotate(Count('news'), Sum('news__clicks'))[0]
+        tag_data = Tag.objects.filter(id=tag_id, news__author=author).annotate(Count('news'), Sum('news__clicks'))[0]
         # 计算作者的文章数量
         news_count = models.News.objects.filter(author_id=author.id, is_delete=False).count()
         # 获取总评论数，总浏览量
@@ -224,3 +227,5 @@ class CategoryView(View):
             filter(author=author, is_delete=False).order_by('-clicks')
         hot_news = hot_news[:5] if hot_news.count() > 5 else hot_news
         return render(request, 'users/category.html', locals())
+
+

@@ -1,3 +1,4 @@
 {{ object.title }}
+{{ object.author.username }}
 {{ object.digest }}
 {{ object.content }}
