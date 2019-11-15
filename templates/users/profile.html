@@ -10,8 +10,8 @@
         <ul class="aside-box">
             <li class="item"><a href="{% url 'users:profile' %}">个人资料</a></li>
             <li class="item"><a href="#">我的收藏</a></li>
-            <li class="item"><a href="#">我的关注</a></li>
-            <li class="item"><a href="#">我的粉丝</a></li>
+            <li class="item"><a href="{% url 'users:follow' %}">我的关注</a></li>
+            <li class="item"><a href="{% url 'users:fans' %}">我的粉丝</a></li>
             <li class="item"><a href="#">我的标签</a></li>
             <li class="item"><a href="{% url 'users:blog' %}">我的博客</a></li>
             <li class="item"><a href="#">我的下载</a></li>

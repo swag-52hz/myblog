@@ -175,6 +175,14 @@
     background-color: #ca0c16;
     color: white;
 }
+.aside-box .head-box .user-info .take-off{
+    color: #999;
+    border: 1px solid #999;
+}
+.aside-box .head-box .user-info .take-off:hover{
+    background-color: #999;
+    color: white;
+}
 .aside-box .data-info .text-center{
     float: left;
     width: 60px;

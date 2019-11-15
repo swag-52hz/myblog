@@ -1,0 +1,26 @@
+{% extends 'users/profile.html' %}
+{% block title %}
+    我的粉丝
+{% endblock %}
+{% block link %}
+    <link rel="stylesheet" href="{% static 'css/users/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/follow.css' %}">
+{% endblock %}
+{% block main-box %}
+    <div class="bar">
+        <h3 class="title">我的粉丝</h3>
+        <span class="num">共{{ fans_count }}人</span>
+    </div>
+    <ul class="follow-list">
+        {% for fans in fanses %}
+            <li class="follow-item">
+                <a href="#"><img src="{{ fans.follower.avatar_url }}" alt="" class="header"></a>
+                <a href="#" class="nick">{{ fans.follower.username }}</a>
+                <a href="#" class="message">私信</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+{% block index %}
+    let index = 3;
+{% endblock %}

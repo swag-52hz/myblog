@@ -12,4 +12,6 @@ urlpatterns = [
     path('upload/', views.UploadImage.as_view(), name='upload'),
     path('news/pub/', views.NewsPubView.as_view(), name='news_pub'),
     path('news/<int:news_id>/', views.NewsEditView.as_view(), name='news_edit'),
+    path('follow/', views.FollowView.as_view(), name='follow'),
+    path('fans/', views.FansView.as_view(), name='fans'),
 ]

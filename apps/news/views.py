@@ -228,6 +228,14 @@ class CategoryView(View):
         if not author_name or not User.objects.filter(username=author_name).exists():
             return render(request, 'base/404notfound.html')
         author = User.objects.filter(username=author_name).first()
+        follow_queryset = Follow.objects.filter(user_id=request.user.id, followed_id=author.id)
+        if not follow_queryset:
+            focus_status = False
+        else:
+            follow = follow_queryset.first()
+            focus_status = follow.status
+        # 计算粉丝数量
+        fans_count = Fans.objects.filter(user_id=author.id, status=True).count()
         # 该标签下的文章数量
         tag_data = Tag.objects.filter(id=tag_id, news__author=author).annotate(Count('news'), Sum('news__clicks'))[0]
         # 计算作者的文章数量

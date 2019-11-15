@@ -1,0 +1,29 @@
+{% extends 'users/profile.html' %}
+{% block title %}
+    我的关注
+{% endblock %}
+{% block link %}
+    <link rel="stylesheet" href="{% static 'css/users/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/follow.css' %}">
+{% endblock %}
+{% block main-box %}
+    <div class="bar">
+        <h3 class="title">我的关注</h3>
+        <span class="num">共{{ follow_count }}人</span>
+    </div>
+    <ul class="follow-list">
+        {% for follower in followers %}
+            <li class="follow-item">
+                <a href="#"><img src="{{ follower.followed.avatar_url }}" alt="" class="header"></a>
+                <a href="#" class="nick">{{ follower.followed.username }}</a>
+                <a href="javascript: void(0);" class="watch-btn common" id="{{ user.id }}-{{ follower.followed.id }}">取消关注</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+{% block index %}
+    let index = 2;
+{% endblock %}
+{% block script %}
+    <script src="{% static 'js/users/follow.js' %}"></script>
+{% endblock %}

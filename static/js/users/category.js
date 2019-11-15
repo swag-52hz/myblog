@@ -6,6 +6,8 @@ $(function () {
   var s = document.getElementsByClassName('user-name')[1];  //获取作者id
   let sAuthorId = Number(s.getAttribute("id"));
   let bIsLoadData = true;   // 是否正在向后台加载数据
+  let $focusBtn = $('.tracking-click');
+  let $takeoffBtn = $('.take-off');
 
   // 加载新闻列表信息
   fn_load_content();
@@ -104,5 +106,57 @@ $(function () {
         message.showError('服务器超时，请重试！');
       });
   }
+
+  // 用户点击关注按钮
+  $focusBtn.click(function () {
+    let sDataParams = {
+      "focus_id": $focusBtn[0].id
+    };
+    $.ajax({
+      url: "/focus/",
+      type: "GET",
+      data: sDataParams,
+      dataType: "json",
+    })
+        .done(function (res) {
+          if (res.errno === "0") {
+            $focusBtn.html('取关');
+            $focusBtn.attr('class', 'common take-off');
+            window.location.reload();
+          } else {
+            // 失败，打印错误信息
+            message.showError(res.errmsg);
+          }
+        })
+        .fail(function () {
+          message.showError('服务器超时，请重试！');
+        });
+  });
+
+  // 用户点击取关按钮
+  $takeoffBtn.click(function () {
+    let sDataParams = {
+      "focus_id": $takeoffBtn[0].id
+    };
+    $.ajax({
+      url: "/takeoff/",
+      type: "GET",
+      data: sDataParams,
+      dataType: "json",
+    })
+        .done(function (res) {
+          if (res.errno === "0") {
+            $takeoffBtn.html("关注");
+            $takeoffBtn.attr('class', 'common tracking-click');
+            window.location.reload();
+          } else {
+            // 失败，打印错误信息
+            message.showError(res.errmsg);
+          }
+        })
+        .fail(function () {
+          message.showError('服务器超时，请重试！');
+        });
+  });
 
 });

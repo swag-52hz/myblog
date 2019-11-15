@@ -66,6 +66,27 @@
         <!-- content end -->
     </div>
 {% endblock %}
+{% block hot-news %}
+    {% for hot in hot_news %}
+        <li>
+            <a href="{% url 'news:news_detail' hot.news.id %}" class="hot-news-contain clearfix">
+                <div class="hot-news-thumbnail">
+                    <img src="{{ hot.news.image_url }}"
+                         alt="">
+                </div>
+                <div class="hot-news-content">
+                    <p class="hot-news-title">{{ hot.news.title }}</p>
+                    <div class="hot-news-other clearfix">
+                        <span class="news-type">{{ hot.news.tag.name }}</span>
+                        <!-- 自带的 -->
+                        <time class="news-pub-time">{{ hot.news.update_time|date:'m月d日' }}</time>
+                        <span class="news-author">{{ hot.news.author.username }}</span>
+                    </div>
+                </div>
+            </a>
+        </li>
+    {% endfor %}
+{% endblock %}
 {% block script %}
     <script src="{% static 'js/news/index.js' %}"></script>
 {% endblock %}

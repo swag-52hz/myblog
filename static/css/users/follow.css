@@ -1,0 +1,80 @@
+.main-box .bar{
+    overflow: hidden;
+    height: 90px;
+    line-height: 90px;
+    border-bottom: 1px solid #e0e0e0;
+}
+.main-box .bar .title{
+    font-size: 20px;
+    color: #3d3d3d;
+    font-weight: bolder;
+    float: left;
+}
+.main-box .bar .num{
+    font-size: 14px;
+    color: #4d4d4d;
+    float: right;
+}
+.main-box .follow-list .follow-item{
+    height: 82px;
+    line-height: 82px;
+    overflow: hidden;
+    border-bottom: 1px solid #e0e0e0;
+}
+.main-box .follow-list .follow-item .header{
+    float: left;
+    width: 50px;
+    height: 50px;
+    margin-right: 16px;
+    border-radius: 50%;
+    margin-top: 16px;
+}
+.main-box .follow-list .follow-item .nick{
+    float: left;
+    font-size: 16px;
+    color: #4d4d4d;
+}
+.main-box .follow-list .follow-item .common{
+    float: right;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 90px;
+    height: 32px;
+    margin-top: 25px;
+    text-align: center;
+    line-height: 32px;
+    background-color: white;
+}
+.main-box .follow-list .follow-item .watch-btn{
+    border: 1px solid #999;
+    color: #999;
+}
+.main-box .follow-list .follow-item .watch-btn:hover{
+    background-color: #ca0c16;
+    color: white;
+}
+.main-box .follow-list .follow-item .focus-btn{
+    border: 1px solid #ca0c16;
+    color: #ca0c16;
+}
+.main-box .follow-list .follow-item .focus-btn:hover{
+    background-color: #ca0c16;
+    color: white;
+}
+.main-box .follow-list .follow-item .message{
+    float: right;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 90px;
+    height: 32px;
+    margin-top: 25px;
+    text-align: center;
+    line-height: 32px;
+    background-color: white;
+    border: 1px solid orange;
+    color: orange;
+}
+.main-box .follow-list .follow-item .message:hover{
+    background-color: orange;
+    color: white;
+}

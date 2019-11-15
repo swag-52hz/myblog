@@ -35,8 +35,17 @@
                 <p><a href="#" class="user-name" id="{{ author.id }}">{{ author.username }}</a></p>
                 <p>
                     <a href="#" class="home-page">Ta的个人主页 ></a>
+                    {% if user.id == author.id %}
+                    {% else %}
                     <a href="#" class="personal-click common">私信</a>
-                    <a href="#" class="tracking-click common">关注</a>
+                    <a href="javascript: void(0);" class="{% if focus_status %}take-off{% else %}tracking-click{% endif %} common" id="{{ user.id }}-{{ author.id }}">
+                        {% if focus_status %}
+                            取关
+                        {% else %}
+                            关注
+                        {% endif %}
+                    </a>
+                    {% endif %}
                 </p>
             </div>
         </div>
@@ -46,20 +55,20 @@
                 <dd><a href="#">{{ news_count }}</a></dd>
             </dl>
             <dl class="text-center">
-                <dt><a href="#">粉丝</a></dt>
-                <dd><a href="#">0</a></dd>
+                <dt>粉丝</dt>
+                <dd>{{ fans_count }}</dd>
             </dl>
             <dl class="text-center">
-                <dt><a href="#">获赞</a></dt>
-                <dd><a href="#">0</a></dd>
+                <dt>获赞</dt>
+                <dd>0</dd>
             </dl>
             <dl class="text-center">
-                <dt><a href="#">评论</a></dt>
-                <dd><a href="#">{{ total_comment }}</a></dd>
+                <dt>评论</dt>
+                <dd>{{ total_comment }}</dd>
             </dl>
             <dl class="text-center">
-                <dt><a href="#">访问</a></dt>
-                <dd><a href="#">{{ total_clicks }}</a></dd>
+                <dt>访问</dt>
+                <dd>{{ total_clicks }}</dd>
             </dl>
         </div>
         <div class="grade-box d-flex">

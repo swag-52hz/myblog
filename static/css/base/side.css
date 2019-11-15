@@ -102,6 +102,7 @@
 }
 .side .side-attention .attention-title {
     font-size: 18px;
+    font-weight: bolder;
 }
 .side-attention .side-attention-address {
     margin: 10px 15px;
@@ -138,6 +139,7 @@
 .side-hot-recommend .hot-recommend {
     font-size: 18px;
     line-height: 60px;
+    font-weight: bolder;
     color: #212121;
 }
 .side-hot-recommend  .hot-news-list li {

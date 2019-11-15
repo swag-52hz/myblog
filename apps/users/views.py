@@ -10,7 +10,7 @@ from utils.res_code import Code, error_map
 from utils.paginator.paginator_func import get_page_list
 from .forms import RegisterForm, LoginForm, NewsPubForm
 from django.db.models import Q
-from .models import User
+from .models import User, Fans, Follow
 from news.models import News, Tag, Comments
 from django.views import View
 from django.http import Http404
@@ -152,6 +152,7 @@ class UserBlogView(View):
         dict_data = dict([(count_list[i], newes[i]) for i in range(newes.count())])
         return render(request, 'users/user_blog.html', locals())
 
+
 class UploadImage(View):
     def post(self, request):
         image_file = request.FILES.get('image_file', '')
@@ -198,3 +199,16 @@ class NewsEditView(View):
         news.is_delete = True
         news.save(update_fields=['is_delete', 'update_time'])
         return to_json_data(errmsg='文章删除成功！')
+
+
+class FollowView(View):
+    def get(self, request):
+        follow_count = Follow.objects.filter(user_id=request.user.id, status=True).count()
+        followers = Follow.objects.filter(user_id=request.user.id, status=True)
+        return render(request, 'users/follow-list.html', locals())
+
+class FansView(View):
+    def get(self, request):
+        fans_count = Fans.objects.filter(user_id=request.user.id, status=True).count()
+        fanses = Fans.objects.filter(user_id=request.user.id, status=True)
+        return render(request, 'users/fans-list.html', locals())

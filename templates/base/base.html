@@ -35,9 +35,9 @@
             {% if user.is_authenticated %}
                 <div class="author">
                     <div class="user-img">
-                        <img src="{{ user.avatar_url }}" alt="">
+                        <a href="{% url 'users:profile' %}"><img src="{{ user.avatar_url }}" alt=""></a>
                     </div>
-                    <p class="user-name">{{ user.username }}</p>
+                    <p class="user-name"><a href="{% url 'users:profile' %}">{{ user.username }}</a></p>
                     <ul class="author-menu">
                         {% if user.is_staff %}
                         <li><a href="{% url 'admin:index' %}"><i class="fa fa-wrench" aria-hidden="true"></i> 后台管理</a></li>
@@ -105,25 +105,8 @@
                     <div class="side-hot-recommend">
                         <h3 class="hot-recommend">热门推荐</h3>
                         <ul class="hot-news-list">
-
-                            <li>
-                                <a href="javascript:void(0)" class="hot-news-contain clearfix">
-                                    <div class="hot-news-thumbnail">
-                                        <img src="/media/python_web.jpg"
-                                             alt="">
-                                    </div>
-                                    <div class="hot-news-content">
-                                        <p class="hot-news-title">Django调试工具django-debug-toolbar安装使用教程</p>
-                                        <div class="hot-news-other clearfix">
-                                            <span class="news-type">python框架</span>
-                                            <!-- 自带的 -->
-                                            <time class="news-pub-time">11月11日</time>
-                                            <span class="news-author">python</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-
+                            {% block hot-news %}
+                            {% endblock %}
                         </ul>
                     </div>
 
