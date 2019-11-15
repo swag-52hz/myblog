@@ -2,15 +2,16 @@ import logging
 import json
 
 import pytz
-from django.db.models import Count
 from django.shortcuts import render
 from django.http import Http404
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views import View
 from django.db.models import Count, Sum
 
 from myblog import settings
 from news.models import Tag
+from users.models import User, Follow, Fans
 from utils.json_fun import to_json_data
 from utils.res_code import Code, error_map
 from haystack.views import SearchView as _SearchView
@@ -37,14 +38,23 @@ class NewsListView(View):
             logger.info('获取标签出错：{}'.format(e))
             tag_id = 0
         try:
+            author_id = int(request.GET.get('author_id', 0))
+        except Exception as e:
+            logger.info('获取作者id出错：{}'.format(e))
+            author_id = 0
+        try:
             page = int(request.GET.get('page', 1))
         except Exception as e:
             logger.info('获取页码出错：{}'.format(e))
             page = 1
         news_queryset = models.News.objects.select_related('tag', 'author')\
             .only('title', 'digest', 'clicks', 'author__username', 'update_time', 'tag__name', 'image_url')
-        news = news_queryset.filter(is_delete=False, tag_id=tag_id).annotate(comment_count=Count('comments'))\
-               or news_queryset.filter(is_delete=False).annotate(comment_count=Count('comments'))
+        if author_id:
+            news = news_queryset.filter(is_delete=False, author_id=author_id, tag_id=tag_id).annotate(comment_count=Count('comments'))\
+                    or news_queryset.filter(is_delete=False).annotate(comment_count=Count('comments'))
+        else:
+            news = news_queryset.filter(is_delete=False, tag_id=tag_id).annotate(comment_count=Count('comments'))\
+                   or news_queryset.filter(is_delete=False).annotate(comment_count=Count('comments'))
         paginator = Paginator(news, NEWS_PER_PAGE)
         try:
             news_info = paginator.page(page)
@@ -96,7 +106,9 @@ class BannerListView(View):
         return to_json_data(data=data)
 
 
-class NewsDetailView(View):
+class NewsDetailView(LoginRequiredMixin, View):
+    redirect_field_name = 'next'
+
     def get(self, request, news_id):
         news = models.News.objects.select_related('author', 'tag').\
             only('title', 'author__username', 'tag__name', 'content', 'update_time', 'clicks').\
@@ -104,6 +116,14 @@ class NewsDetailView(View):
         if news:
             news.clicks = int(news.clicks) + 1
             news.save(update_fields=['clicks'])
+            follow_queryset = Follow.objects.filter(user_id=request.user.id, followed_id=news.author.id)
+            if not follow_queryset:
+                focus_status = False
+            else:
+                follow = follow_queryset.first()
+                focus_status = follow.status
+            # 计算粉丝数量
+            fans_count = Fans.objects.filter(user_id=news.author.id, status=True).count()
             # 计算作者的文章数量
             news_count = models.News.objects.filter(author_id=news.author.id).count()
             all_news = models.News.objects.filter(author_id=news.author.id, is_delete=False)
@@ -204,7 +224,10 @@ class CategoryView(View):
             return render(request, 'base/404notfound.html')
         newes = models.News.objects.only('title', 'digest', 'update_time', 'clicks')\
             .filter(tag_id=tag.id, is_delete=False).annotate(comment_count=Count('comments'))[:10]
-        author = tag.news_set.first().author
+        author_name = request.GET.get('author', '')
+        if not author_name or not User.objects.filter(username=author_name).exists():
+            return render(request, 'base/404notfound.html')
+        author = User.objects.filter(username=author_name).first()
         # 该标签下的文章数量
         tag_data = Tag.objects.filter(id=tag_id, news__author=author).annotate(Count('news'), Sum('news__clicks'))[0]
         # 计算作者的文章数量
@@ -229,3 +252,35 @@ class CategoryView(View):
         return render(request, 'users/category.html', locals())
 
 
+class FocusView(View):
+    def get(self, request):
+        focus_id = request.GET.get('focus_id', '')
+        if not focus_id:
+            return to_json_data(errno=Code.PARAMERR, errmsg='关注失败！')
+        id_list = focus_id.split('-')
+        user_id = int(id_list[0])
+        author_id = int(id_list[1])
+        follow_instance, is_create = Follow.objects.get_or_create(user_id=user_id, followed_id=author_id)
+        follow_instance.status = True
+        follow_instance.save()
+        fans_instance, is_create = Fans.objects.get_or_create(user_id=author_id, follower_id=user_id)
+        fans_instance.status = True
+        fans_instance.save()
+        return to_json_data(errmsg='关注成功！')
+
+
+class TakeOffView(View):
+    def get(self, request):
+        focus_id = request.GET.get('focus_id', '')
+        if not focus_id:
+            return to_json_data(errno=Code.PARAMERR, errmsg='取关失败！')
+        id_list = focus_id.split('-')
+        user_id = int(id_list[0])
+        author_id = int(id_list[1])
+        follow_instance, is_create = Follow.objects.get_or_create(user_id=user_id, followed_id=author_id)
+        follow_instance.status = False
+        follow_instance.save()
+        fans_instance, is_create = Fans.objects.get_or_create(user_id=author_id, follower_id=user_id)
+        fans_instance.status = False
+        fans_instance.save()
+        return to_json_data(errmsg='取关成功！')

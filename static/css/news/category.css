@@ -84,6 +84,9 @@
     margin-top: 3px;
     margin-right: 8px;
 }
+.column .category-article-list li a:hover .category-title{
+    color: #ca0c16;
+}
 .column .btn-more {
     display: block;
     border: none;

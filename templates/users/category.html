@@ -32,7 +32,7 @@
                 <a href="#"><img src="{{ author.avatar_url }}" alt=""></a>
             </div>
             <div class="user-info">
-                <p><a href="#" class="user-name">{{ author.username }}</a></p>
+                <p><a href="#" class="user-name" id="{{ author.id }}">{{ author.username }}</a></p>
                 <p>
                     <a href="#" class="home-page">Ta的个人主页 ></a>
                     <a href="#" class="personal-click common">私信</a>
@@ -81,10 +81,10 @@
             <ul class="category-list clearfix">
                 {% for tag in data_dict %}
                 <li>
-                    <a href="{% url 'news:category' tag.id %}">
+                    <a href="/news/category/{{ tag.id }}?author={{ author.username }}">
                         <img src="/media/tag.png" alt="">
                         <span>{{ tag.name }}</span>
-                        <span class="count">{{ tag.news_count }}</span>
+                        <span class="count">{{ tag.news_count }}篇</span>
                     </a>
                 </li>
                 {% endfor %}

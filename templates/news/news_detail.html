@@ -81,8 +81,17 @@
                 <p><a href="#" class="user-name">{{ news.author.username }}</a></p>
                 <p>
                     <a href="#" class="home-page">Ta的个人主页 ></a>
+                    {% if user.id == news.author.id %}
+                    {% else %}
                     <a href="#" class="personal-click common">私信</a>
-                    <a href="#" class="tracking-click common">关注</a>
+                    <a href="javascript: void(0);" class="{% if focus_status %}take-off{% else %}tracking-click{% endif %} common" id="{{ user.id }}-{{ news.author.id }}">
+                        {% if focus_status %}
+                            取关
+                        {% else %}
+                            关注
+                        {% endif %}
+                    </a>
+                    {% endif %}
                 </p>
             </div>
         </div>
@@ -93,7 +102,7 @@
             </dl>
             <dl class="text-center">
                 <dt><a href="#">粉丝</a></dt>
-                <dd><a href="#">0</a></dd>
+                <dd><a href="#">{{ fans_count }}</a></dd>
             </dl>
             <dl class="text-center">
                 <dt><a href="#">获赞</a></dt>
@@ -127,10 +136,10 @@
             <ul class="category-list clearfix">
                 {% for tag in data_dict %}
                 <li>
-                    <a href="{% url 'news:category' tag.id %}">
+                    <a href="/news/category/{{ tag.id }}?author={{ news.author.username }}">
                         <img src="/media/tag.png" alt="">
                         <span>{{ tag.name }}</span>
-                        <span class="count">{{ tag.news_count }}</span>
+                        <span class="count">{{ tag.news_count }}篇</span>
                     </a>
                 </li>
                 {% endfor %}

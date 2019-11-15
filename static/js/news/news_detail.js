@@ -2,6 +2,9 @@ $(function () {
   // 未登录提示框
   let $loginComment = $('.please-login-comment input');
   let $send_comment = $('.logged-comment .comment-btn');
+  let $focusBtn = $('.tracking-click');
+  let $takeoffBtn = $('.take-off');
+
 
   $('.comment-list').delegate('a,input', 'click', function () {
 
@@ -187,6 +190,58 @@ $(function () {
       .fail(function () {
         message.showError('服务器超时，请重试！');
       });
+  });
+
+  // 用户点击关注按钮
+  $focusBtn.click(function () {
+    let sDataParams = {
+      "focus_id": $focusBtn[0].id
+    };
+    $.ajax({
+      url: "/focus/",
+      type: "GET",
+      data: sDataParams,
+      dataType: "json",
+    })
+        .done(function (res) {
+          if (res.errno === "0") {
+            $focusBtn.html('取关');
+            $focusBtn.attr('class', 'common take-off');
+            window.location.reload();
+          } else {
+            // 失败，打印错误信息
+            message.showError(res.errmsg);
+          }
+        })
+        .fail(function () {
+          message.showError('服务器超时，请重试！');
+        });
+  });
+
+  // 用户点击取关按钮
+  $takeoffBtn.click(function () {
+    let sDataParams = {
+      "focus_id": $takeoffBtn[0].id
+    };
+    $.ajax({
+      url: "/takeoff/",
+      type: "GET",
+      data: sDataParams,
+      dataType: "json",
+    })
+        .done(function (res) {
+          if (res.errno === "0") {
+            $takeoffBtn.html("关注");
+            $takeoffBtn.attr('class', 'common tracking-click');
+            window.location.reload();
+          } else {
+            // 失败，打印错误信息
+            message.showError(res.errmsg);
+          }
+        })
+        .fail(function () {
+          message.showError('服务器超时，请重试！');
+        });
   });
 
   // get cookie using jQuery

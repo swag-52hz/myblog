@@ -11,4 +11,6 @@ urlpatterns = [
     path('news/<int:news_id>/comments/', views.AddCommentsView.as_view(), name='news_comments'),
     path('search/', views.SearchView(), name='search'),
     path('news/category/<int:tag_id>/', views.CategoryView.as_view(), name='category'),
+    path('focus/', views.FocusView.as_view(), name='focus'),
+    path('takeoff/', views.TakeOffView.as_view(), name='takeoff'),
 ]

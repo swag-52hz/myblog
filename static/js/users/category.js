@@ -3,6 +3,8 @@ $(function () {
   let iPage = 1;  //默认第1页
   let iTotalPage = 1; //默认总页数为1
   let sCurrentTagId = Number(window.location.href.split("/")[5]); //获取当前页面的分类id
+  var s = document.getElementsByClassName('user-name')[1];  //获取作者id
+  let sAuthorId = Number(s.getAttribute("id"));
   let bIsLoadData = true;   // 是否正在向后台加载数据
 
   // 加载新闻列表信息
@@ -35,7 +37,7 @@ $(function () {
         } else {
           message.showInfo('已全部加载，没有更多内容！');
           $(".btn-more").remove();  // 删除标签
-          $(".news-list").append($('<a href="javascript:void(0);" class="btn-more">已全部加载，没有更多内容！</a>'))
+          $(".category-article-list").append($('<a href="javascript:void(0);" class="btn-more">已全部加载，没有更多内容！</a>'))
 
         }
       }
@@ -50,7 +52,8 @@ $(function () {
     // 创建请求参数
     let sDataParams = {
       "tag_id": sCurrentTagId,
-      "page": iPage
+      "page": iPage,
+      "author_id": sAuthorId,
     };
 
     // 创建ajax请求
