@@ -9,8 +9,9 @@ from utils.json_fun import to_json_data
 from utils.res_code import Code, error_map
 from utils.paginator.paginator_func import get_page_list
 from .forms import RegisterForm, LoginForm, NewsPubForm
-from django.db.models import Q
+from django.db.models import Q, Sum, Count
 from .models import User, Fans, Follow
+from news import models
 from news.models import News, Tag, Comments
 from django.views import View
 from django.http import Http404
@@ -212,3 +213,68 @@ class FansView(View):
         fans_count = Fans.objects.filter(user_id=request.user.id, status=True).count()
         fanses = Fans.objects.filter(user_id=request.user.id, status=True)
         return render(request, 'users/fans-list.html', locals())
+
+
+class HomePageView(View):
+    def get(self, request, author_id):
+        author = User.objects.filter(id=author_id).first()
+        if not author:
+            return render(request, 'base/404notfound.html')
+        newes = News.objects.filter(is_delete=False, author=author)
+        return render(request, 'users/home_page.html', locals())
+
+
+class NewsByUserView(View):
+    def get(self, request, username):
+        author = User.objects.filter(username=username).first()
+        if not author:
+            return render(request, 'base/404notfound.html')
+        order = request.GET.get('order', '')
+        if order == 'time':
+            newses = models.News.objects.filter(is_delete=False, author=author).\
+                         order_by('-update_time').annotate(comment_count=Count('comments'))
+        elif order == 'visits':
+            newses = models.News.objects.filter(is_delete=False, author=author).\
+                         order_by('-clicks').annotate(comment_count=Count('comments'))
+        else:
+            newses = models.News.objects.filter(is_delete=False, author=author).annotate(comment_count=Count('comments'))
+        num = newses.count()
+        if num > 10:
+            try:
+                page_num = int(request.GET.get('page', '1'))
+            except Exception as e:
+                logger.info('获取页码出错：{}'.format(e))
+                # 若获取页码出错则返回第一页数据
+                page_num = 1
+            paginator = Paginator(newses, 10)
+            total_page = paginator.num_pages
+            page_list = get_page_list(page_num, paginator)
+            newses = paginator.get_page(page_num).object_list
+        follow_queryset = Follow.objects.filter(user_id=request.user.id, followed_id=author.id)
+        if not follow_queryset:
+            focus_status = False
+        else:
+            follow = follow_queryset.first()
+            focus_status = follow.status
+        # 计算粉丝数量
+        fans_count = Fans.objects.filter(user_id=author.id, status=True).count()
+        # 计算作者的文章数量
+        news_count = models.News.objects.filter(author_id=author.id, is_delete=False).count()
+        # 获取总评论数，总浏览量
+        total_clicks = models.News.objects.filter(author_id=author.id, is_delete=False).aggregate(
+                clicks=Sum('clicks')).get( 'clicks')
+        if total_clicks > 400000:
+            total_clicks = '40万+'
+        total_comment = models.News.objects.filter(author_id=author.id).aggregate(comments=Count('comments')).get(
+            'comments')
+        # 获取作者最新的五篇文章，若不足五篇则返回所有
+        latest_news = models.News.objects.only('id', 'title'). \
+            filter(author_id=author.id, is_delete=False).order_by('-update_time')
+        latest_news = latest_news[:5] if latest_news.count() > 5 else latest_news
+        tags = Tag.objects.filter(is_delete=False, news__author=author).values('id', 'name'). \
+            annotate(news_count=Count('news')).order_by('-news_count')
+        data_dict = tags[:5] if tags.count() > 5 else tags
+        hot_news = models.News.objects.only('id', 'title', 'clicks'). \
+            filter(author=author, is_delete=False).order_by('-clicks')
+        hot_news = hot_news[:5] if hot_news.count() > 5 else hot_news
+        return render(request, 'users/news-list.html', locals())

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 
 
@@ -14,4 +14,6 @@ urlpatterns = [
     path('news/<int:news_id>/', views.NewsEditView.as_view(), name='news_edit'),
     path('follow/', views.FollowView.as_view(), name='follow'),
     path('fans/', views.FansView.as_view(), name='fans'),
+    path('personal/<int:author_id>/', views.HomePageView.as_view(), name='hp'),
+    re_path('(?P<username>\w{4,20})/', views.NewsByUserView.as_view(), name='news'),
 ]

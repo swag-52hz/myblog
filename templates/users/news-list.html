@@ -1,32 +1,13 @@
 {% extends 'base/base.html' %}
 {% block title %}
-    分类专栏
+    {{ author.username }}的博客
 {% endblock %}
 {% block link %}
-    <link rel="stylesheet" href="{% static 'css/news/category.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/news-list.css' %}">
 {% endblock %}
-{% block main-contain %}
-    <div class="column">
-        <div class="info-box">
-            <div class="category-img">
-                <img src="/media/tag.png" alt="">
-            </div>
-            <div class="category-title">
-                <h3>{{ tag.name }}</h3>
-                <a href="{% url 'users:blog' %}">管理文章</a>
-            </div>
-            <div class="category-info">
-                <p><span>关注数：0</span><span>文章数：{{ tag_data.news__count }}</span><span>访问量：{{ tag_data.news__clicks__sum }}</span></p>
-            </div>
-        </div>
-        <ul class="category-article-list">
-
-        </ul>
-        <a href="javascript:void(0);" class="btn-more">滑动加载更多</a>
-    </div>
-{% endblock %}
-{% block side %}
-    <div class="aside-box">
+{% block main %}
+    <div class="w1200 clearfix">
+        <div class="aside-box">
         <div class="head-box d-flex">
             <div class="avatar-box">
                 <a href="{% url 'users:news' author.username %}"><img src="{{ author.avatar_url }}" alt=""></a>
@@ -111,7 +92,58 @@
             </ul>
         </div>
     </div>
+        <main>
+            <div class="filter-box">
+                <form action="">
+                    <label for="check" class="chk-box">
+                        <input type="checkbox" name="t" value="1" id="check"> 只看原创
+                    </label>
+                </form>
+                <dl class="filter-sort-box">
+                    <dd>排序：</dd>
+                    <dd><a href="{% url 'users:news' author.username %}" {% if order == '' %}style="color: #ca0c16;"{% endif %}>默认</a></dd>
+                    <dd><a href="/users/{{ author.username }}?order=time" {% if order == 'time' %}style="color: #ca0c16;"{% endif %}>按更新时间</a></dd>
+                    <dd><a href="/users/{{ author.username }}?order=visits" {% if order == 'visits' %}style="color: #ca0c16;"{% endif %}>按访问量</a></dd>
+                </dl>
+            </div>
+            <ul class="news-article-list">
+                {% for news in newses %}
+                    <li class="article-item">
+                    <h4>
+                        <a href="{% url 'news:news_detail' news.id %}"><span>原创</span> {{ news.title }}</a>
+                    </h4>
+                    <p class="content">
+                        <a href="{% url 'news:news_detail' news.id %}">{{ news.digest }}</a>
+                    </p>
+                    <div class="info-box">
+                        <p><span>{{ news.update_time|date:'Y-m-d H:i:s' }}</span></p>
+                        <p class="point"></p>
+                        <p><span>阅读数：{{ news.clicks }}</span></p>
+                        <p class="point"></p>
+                        <p><span>评论数：{{ news.comment_count }}</span></p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% if num > 10 %}
+                <ul class="page-box">
+        <li><a class="first-last" href="{{ request.path }}?page=1">返回首页</a></li>
+        <li>
+            <a {% if page_num == 1 %}class="disabled"{% endif %} href="{{ request.path }}?page={{ page_num|add:'-1' }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i></a>
+        </li>
+        {% for page in page_list %}
+            <li {% if page == page_num %}class="current_page"{% endif %}>
+                <a href="{{ request.path }}?page={{ page }}">{{ page }}</a>
+            </li>
+        {% endfor %}
+        <li><a {% if page_num == total_page %}class="disabled"{% endif %} href="{{ request.path }}?page={{ page_num|add:'1' }}"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i></a></li>
+        <li><a class="first-last" href="{{ request.path }}?page={{ total_page }}">跳到末页</a></li>
+    </ul>
+            {% endif %}
+        </main>
+    </div>
 {% endblock %}
 {% block script %}
     <script src="{% static 'js/users/category.js' %}"></script>
 {% endblock %}
+

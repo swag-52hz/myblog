@@ -1,0 +1,73 @@
+.page-header{
+    position: relative;
+    color: #fff;
+    min-height: 550px;
+    background: linear-gradient(0deg, rgba(44, 44, 44, 0.2), rgba(55, 140, 63, 0.6)), url("../../../media/home-page.jpg");
+    background-size: cover;
+    background-position: center center;
+}
+.page-header:before{
+    /*background-color: rgba(0, 0, 0, 0.5);*/
+}
+/*.page-header:before, .page-header:after{*/
+/*    position: absolute;*/
+/*    z-index: 0;*/
+/*    width: 100%;*/
+/*    height: 100%;*/
+/*    display: block;*/
+/*    left: 0;*/
+/*    top: 0;*/
+/*    content: "";*/
+/*}*/
+.page-header .container{
+    width: 1200px;
+    height: 550px;
+    margin:auto;
+}
+.content-center{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    padding: 0 15px;
+    color: #FFFFFF;
+    width: 880px;
+    height: 340px;
+}
+.profile-image img{
+    position: relative;
+    border-radius: 50%;
+    height: 150px;
+    width: 150px;
+    padding: 0;
+    margin: 0;
+    border: 15px solid transparent;
+    transition: all 300ms ease-out;
+}
+.content-center h3{
+    font-size: 20px;
+}
+.btn-group{
+    height: 40px;
+    line-height: 40px;
+    margin-top: 30px;
+}
+.btn-group .btn{
+    width: 140px;
+    height: 40px;
+    background-color: #378C3F;
+    color: #FFFFFF;
+    border-width: 2px;
+    font-weight: 400;
+    font-size: 0.8571em;
+    line-height: 1.35em;
+    margin: 5px 1px;
+    border: none;
+    border-radius: 0.1875rem;
+    padding: 11px 22px;
+    cursor: pointer;
+}
+.btn-group .btn:hover{
+    background-color: rgb(64, 162, 73);
+}

@@ -75,12 +75,12 @@
     <div class="aside-box">
         <div class="head-box d-flex">
             <div class="avatar-box">
-                <a href="#"><img src="{{ news.author.avatar_url }}" alt=""></a>
+                <a href="{% url 'users:news' news.author.username %}"><img src="{{ news.author.avatar_url }}" alt=""></a>
             </div>
             <div class="user-info">
-                <p><a href="#" class="user-name">{{ news.author.username }}</a></p>
+                <p><a href="{% url 'users:news' news.author.username %}" class="user-name">{{ news.author.username }}</a></p>
                 <p>
-                    <a href="#" class="home-page">Ta的个人主页 ></a>
+                    <a href="{% url 'users:hp' news.author.id %}" class="home-page">Ta的个人主页 ></a>
                     {% if user.id == news.author.id %}
                     {% else %}
                     <a href="#" class="personal-click common">私信</a>

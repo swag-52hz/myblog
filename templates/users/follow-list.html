@@ -14,8 +14,8 @@
     <ul class="follow-list">
         {% for follower in followers %}
             <li class="follow-item">
-                <a href="#"><img src="{{ follower.followed.avatar_url }}" alt="" class="header"></a>
-                <a href="#" class="nick">{{ follower.followed.username }}</a>
+                <a href="{% url 'users:hp' follower.followed_id %}"><img src="{{ follower.followed.avatar_url }}" alt="" class="header"></a>
+                <a href="{% url 'users:hp' follower.followed_id %}" class="nick">{{ follower.followed.username }}</a>
                 <a href="javascript: void(0);" class="watch-btn common" id="{{ user.id }}-{{ follower.followed.id }}">取消关注</a>
             </li>
         {% endfor %}

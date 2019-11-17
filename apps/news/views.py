@@ -125,7 +125,7 @@ class NewsDetailView(LoginRequiredMixin, View):
             # 计算粉丝数量
             fans_count = Fans.objects.filter(user_id=news.author.id, status=True).count()
             # 计算作者的文章数量
-            news_count = models.News.objects.filter(author_id=news.author.id).count()
+            news_count = models.News.objects.filter(author_id=news.author.id, is_delete=False).count()
             all_news = models.News.objects.filter(author_id=news.author.id, is_delete=False)
             # 获取总评论数，总浏览量
             total_clicks = models.News.objects.filter(author_id=news.author.id).aggregate(clicks=Sum('clicks')).get('clicks')

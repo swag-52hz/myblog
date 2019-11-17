@@ -14,9 +14,9 @@
     <ul class="follow-list">
         {% for fans in fanses %}
             <li class="follow-item">
-                <a href="#"><img src="{{ fans.follower.avatar_url }}" alt="" class="header"></a>
-                <a href="#" class="nick">{{ fans.follower.username }}</a>
-                <a href="#" class="message">私信</a>
+                <a href="{% url 'users:hp' fans.follower_id %}"><img src="{{ fans.follower.avatar_url }}" alt="" class="header"></a>
+                <a href="{% url 'users:hp' fans.follower_id %}" class="nick">{{ fans.follower.username }}</a>
+                <a href="javascript: void(0);" class="message">私信</a>
             </li>
         {% endfor %}
     </ul>
