@@ -8,4 +8,5 @@ urlpatterns = [
     re_path(r'usernames/(?P<username>\w{4,20})/', views.CheckUsername.as_view(), name='check_username'),
     re_path(r'mobiles/(?P<mobile>1[345789]\d{9})/', views.CheckPhone.as_view(), name='check_phone'),
     path('sms_codes/', views.SmsCodeView.as_view(), name='sms_code'),
+    re_path(r'phone/(?P<phone>1[345789]\d{9})/', views.SendSmsCode.as_view(), name='send_code'),
 ]

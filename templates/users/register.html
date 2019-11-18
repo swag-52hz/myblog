@@ -10,12 +10,12 @@
 <main id="container">
   <div class="register-contain">
     <div class="top-contain">
-      <h4 class="please-register">请注册</h4>
+      <h4 class="please-register">{% block section %}请注册{% endblock %}</h4>
       <a href="{% url 'users:login' %}" class="login">立即登录 &gt;</a>
     </div>
     <form action="" method="post" class="form-contain">
 
-
+        {% block form %}
       <div class="form-item">
         <input type="text" placeholder="请输入用户名" id="user_name" name="username" class="form-control" autocomplete="off">
       </div>
@@ -41,6 +41,7 @@
       <div class="form-item">
         <input type="submit" value="立即注册" class="register-btn">
       </div>
+            {% endblock %}
     </form>
   </div>
 </main>

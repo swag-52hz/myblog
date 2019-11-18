@@ -1,8 +1,11 @@
 from datetime import datetime
+import re
 import json
 import logging
 from django.shortcuts import render, redirect, reverse
 from django.core.paginator import Paginator, EmptyPage
+from django_redis import get_redis_connection
+
 from myblog import settings
 from utils.fastdfs.client import FDFS_Client
 from utils.json_fun import to_json_data
@@ -208,6 +211,7 @@ class FollowView(View):
         followers = Follow.objects.filter(user_id=request.user.id, status=True)
         return render(request, 'users/follow-list.html', locals())
 
+
 class FansView(View):
     def get(self, request):
         fans_count = Fans.objects.filter(user_id=request.user.id, status=True).count()
@@ -278,3 +282,55 @@ class NewsByUserView(View):
             filter(author=author, is_delete=False).order_by('-clicks')
         hot_news = hot_news[:5] if hot_news.count() > 5 else hot_news
         return render(request, 'users/news-list.html', locals())
+
+
+class ForgetView(View):
+    def get(self, request):
+        return render(request, 'users/forget.html')
+
+    def post(self, request):
+        json_data = request.body.decode('utf8')
+        if not json_data:
+            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+        dict_data = json.loads(json_data)
+        phone = dict_data.get('mobile', '')
+        sms_code = dict_data.get('sms_code', '')
+        if not phone or not sms_code:
+            return to_json_data(errno=Code.DATAERR, errmsg='手机号或验证码不能为空！')
+        if not re.match(r'^1[3-9]\d{9}$', phone):
+            return to_json_data(errno=Code.DATAERR, errmsg='手机号格式有误！')
+        if not User.objects.filter(phone=phone).exists():
+            return to_json_data(errno=Code.DATAERR, errmsg='此手机号未被注册！')
+        redis_conn = get_redis_connection('verify_codes')
+        sms_key = 'sms_{}'.format(phone)
+        real_sms_text = redis_conn.get(sms_key)
+        if not real_sms_text or sms_code != real_sms_text.decode('utf-8'):
+            return to_json_data(errno=Code.DATAERR, errmsg='短信验证失败！')
+        res = to_json_data(errmsg='通过验证！！！')
+        cookie_key = 'sms_code'.format(phone)
+        res.set_cookie(cookie_key, phone, 300)
+        return res
+
+
+class ResetPassword(View):
+    def get(self, request):
+        return render(request, 'users/reset_password.html')
+
+    def post(self, request):
+        json_data = request.body.decode('utf8')
+        if not json_data:
+            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+        dict_data = json.loads(json_data)
+        password = dict_data.get('password', '')
+        password_repeat = dict_data.get('password_repeat', '')
+        if not password or not password_repeat:
+            return to_json_data(errno=Code.PARAMERR, errmsg='密码或确认密码不能为空！')
+        if password_repeat != password:
+            return to_json_data(errno=Code.PARAMERR, errmsg='两次输入的密码不一致！')
+        phone = request.COOKIES.get('sms_code', '')
+        if not phone:
+            return to_json_data(errno=Code.PARAMERR, errmsg='操作时间过长，请重新验证！')
+        user = User.objects.filter(phone=phone).first()
+        user.set_password(password)
+        user.save()
+        return to_json_data(errmsg='密码修改成功！')

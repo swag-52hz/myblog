@@ -25,7 +25,7 @@
           <input type="checkbox" name="remember">
           <span>记住我</span>
         </label>
-        <a href="javascript:void(0);" class="forget-password">忘记密码?</a>
+        <a href="{% url 'users:forget' %}" class="forget-password">忘记密码?</a>
       </div>
       <div class="form-login">
         <input type="submit" value="登录" class="login-btn">

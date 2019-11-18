@@ -69,7 +69,7 @@ $(function () {
             window.location.href = sDomain + sCurrentUrl.split('=')[1];
           }else{
             // 注册成功之后重定向到打开登录页面之前的页面
-            window.location.href = document.referrer;
+            window.location.href = 'http://127.0.0.1:8000/';
           }
           }, 800)
         } else {

@@ -1,0 +1,26 @@
+{% extends 'users/register.html' %}
+{% block title %}
+    忘记密码
+{% endblock %}
+{% block link %}
+    <link rel="stylesheet" href="{% static 'css/auth/auth.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/forget.css' %}">
+{% endblock %}
+{% block section %}
+    请验证
+{% endblock %}
+{% block form %}
+    <div class="form-item">
+        <input type="tel" placeholder="请输入注册时所用的手机号" id="mobile" name="telephone" class="form-control" autocomplete="off">
+      </div>
+    <div class="form-item">
+        <input type="text" placeholder="请输入短信验证码" name="sms_captcha" class="form-captcha" id="input_smscode" autocomplete="off">
+        <a href="javascript:void(0);" class="sms-captcha" title="发送验证码">获取短信验证码</a>
+      </div>
+      <div class="form-item">
+        <input type="submit" value="下一步" class="register-btn">
+      </div>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'js/users/forget.js' %}"></script>
+{% endblock %}

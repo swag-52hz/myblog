@@ -105,3 +105,33 @@ class SmsCodeView(View):
             return to_json_data(errno=Code.DATAERR, errmsg=err_msg_str)
 
 
+class SendSmsCode(View):
+    def get(self, request, phone):
+        sms_num = ''.join([random.choice(string.digits) for _ in range(SMS_CODE_NUM)])
+        redis_conn = get_redis_connection('verify_codes')
+        sms_key = 'sms_{}'.format(phone)
+        sms_flag_key = 'sms_flag_{}'.format(phone)
+        p1 = redis_conn.pipeline()
+        try:
+            p1.setex(sms_flag_key, 60, 1)
+            p1.setex(sms_key, 300, sms_num)
+            p1.execute()
+        except Exception as e:
+            logger.debug('redis执行异常: {}'.format(e))
+            return to_json_data(errno=Code.UNKOWNERR, errmsg='redis执行异常')
+        try:
+            client = smsclient.ZhenziSmsClient('https://sms_developer.zhenzikj.com', '101357',
+                                               'bf00ccbc-1f60-4f1c-a739-ba9ec7f4872d')
+            # result = client.send(mobile, '您的验证码为' + sms_num)
+            # res = int(result[8])
+            res = 0
+        except Exception as e:
+            logger.debug('短信验证码发送[异常]: {}'.format(e))
+            return to_json_data(errno=Code.SMSERROR, errmsg=error_map[Code.SMSERROR])
+        else:
+            if res == 0:
+                logger.info('{}短信验证码发送[成功]: {}'.format(phone, sms_num))
+                return to_json_data(errmsg='短信验证码发送成功')
+            else:
+                logger.debug('{}短信验证码发送[失败]: {}'.format(phone, sms_num))
+                return to_json_data(errno=Code.SMSFAIL, errmsg=error_map[Code.SMSFAIL])

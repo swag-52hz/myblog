@@ -15,5 +15,7 @@ urlpatterns = [
     path('follow/', views.FollowView.as_view(), name='follow'),
     path('fans/', views.FansView.as_view(), name='fans'),
     path('personal/<int:author_id>/', views.HomePageView.as_view(), name='hp'),
+    path('forget/', views.ForgetView.as_view(), name='forget'),
+    path('reset/', views.ResetPassword.as_view(), name='reset'),
     re_path('(?P<username>\w{4,20})/', views.NewsByUserView.as_view(), name='news'),
 ]
